@@ -1,0 +1,305 @@
+I"Xi<h2 id="拦截器">拦截器</h2>
+
+<h3 id="1简介">1.简介</h3>
+
+<p>Spring MVC 中的拦截器（Interceptor）类似于 Servlet  开发中的过滤器 Filter，它主要用于拦截用户请求并作相应的处理,它也是 AOP 编程思想的体现,底层通过动态代理模式完成。</p>
+
+<h3 id="2定义实现类">2.定义实现类</h3>
+
+<p>拦截器有两种实现方式： 1.实现 HandlerInterceptor 接口 2.继承 HandlerInterceptorAdapter 抽象类（看源码最底层也是通过 HandlerInterceptor 接口 实现）</p>
+
+<h3 id="3handlerinterceptor方法介绍">3.HandlerInterceptor方法介绍</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">preHandle</span><span class="o">(</span><span class="nc">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span> <span class="nc">HttpServletResponse</span> <span class="n">response</span><span class="o">,</span> <span class="nc">Object</span> <span class="n">handler</span><span class="o">)</span>
+			<span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+		
+        <span class="c1">//进行逻辑判断，如果ok就返回true，不行就返回false，返回false就不会处理请求</span>
+		<span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
+	<span class="o">}</span>
+	
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">postHandle</span><span class="o">(</span><span class="nc">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span> <span class="nc">HttpServletResponse</span> <span class="n">response</span><span class="o">,</span> <span class="nc">Object</span> <span class="n">handler</span><span class="o">,</span>
+			<span class="nc">ModelAndView</span> <span class="n">modelAndView</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+	<span class="o">}</span>
+
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">afterCompletion</span><span class="o">(</span><span class="nc">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span> <span class="nc">HttpServletResponse</span> <span class="n">response</span><span class="o">,</span> <span class="nc">Object</span> <span class="n">handler</span><span class="o">,</span> <span class="nc">Exception</span> <span class="n">ex</span><span class="o">)</span>
+			<span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+	<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p>preHandle：在业务处理器处理请求之前被调用。预处理，可以进行编码、安全控制、权限校验等处理； postHandle：在业务处理器处理请求执行完成后，生成视图之前执行。 afterCompletion：在 DispatcherServlet 完全处理完请求后被调用，可用于清理资源等。</p>
+
+<h3 id="4应用场景">4.应用场景</h3>
+
+<blockquote>
+  <p>1.日志记录：记录请求信息的日志，以便进行信息监控、信息统计、计算PV（Page View）等； 2.登录鉴权：如登录检测，进入处理器检测检测是否登录； 3.性能监控：检测方法的执行时间； 4.其他通用行为。</p>
+</blockquote>
+
+<h3 id="5与-filter-过滤器的区别">5.与 Filter 过滤器的区别</h3>
+
+<blockquote>
+  <p>1.拦截器是基于java的反射机制的，而过滤器是基于函数回调。 2.拦截器不依赖于servlet容器，而过滤器依赖于servlet容器。 3.拦截器只能对Controller请求起作用，而过滤器则可以对几乎所有的请求起作用。 4.拦截器可以访问action上下文、值栈里的对象，而过滤器不能访问。 5.在Controller的生命周期中，拦截器可以多次被调用，而过滤器只能在容器初始化时被调用一次。 6.拦截器可以获取IOC容器中的各个bean，而过滤器不行。这点很重要，在拦截器里注入一个service，可以调用业务逻辑。</p>
+</blockquote>
+
+<h2 id="具体实现">具体实现</h2>
+
+<h3 id="单个拦截器">单个拦截器</h3>
+
+<h4 id="1新建拦截器">1.新建拦截器</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code>	<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Test1Interceptor</span> <span class="kd">implements</span> <span class="nc">HandlerInterceptor</span><span class="o">{</span>
+
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">preHandle</span><span class="o">(</span><span class="nc">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span> <span class="nc">HttpServletResponse</span> <span class="n">response</span><span class="o">,</span> <span class="nc">Object</span> <span class="n">handler</span><span class="o">)</span>
+			<span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"执行preHandle方法--&gt;01"</span><span class="o">);</span>
+		<span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
+	<span class="o">}</span>
+	
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">postHandle</span><span class="o">(</span><span class="nc">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span> <span class="nc">HttpServletResponse</span> <span class="n">response</span><span class="o">,</span> <span class="nc">Object</span> <span class="n">handler</span><span class="o">,</span>
+			<span class="nc">ModelAndView</span> <span class="n">modelAndView</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"执行postHandle方法--&gt;02"</span><span class="o">);</span>
+	<span class="o">}</span>
+
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">afterCompletion</span><span class="o">(</span><span class="nc">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span> <span class="nc">HttpServletResponse</span> <span class="n">response</span><span class="o">,</span> <span class="nc">Object</span> <span class="n">handler</span><span class="o">,</span> <span class="nc">Exception</span> <span class="n">ex</span><span class="o">)</span>
+			<span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"执行afterCompletion方法--&gt;03"</span><span class="o">);</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="2配置拦截器">2.配置拦截器</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Configuration</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">WebMvcConfig</span> <span class="kd">extends</span> <span class="nc">WebMvcConfigurationSupport</span> <span class="o">{</span>
+	<span class="cm">/*
+	 * 拦截器配置
+	 */</span>
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">addInterceptors</span><span class="o">(</span><span class="nc">InterceptorRegistry</span> <span class="n">registry</span><span class="o">)</span> <span class="o">{</span>
+		<span class="c1">// 注册自定义拦截器，添加拦截路径和排除拦截路径</span>
+		<span class="n">registry</span><span class="o">.</span><span class="na">addInterceptor</span><span class="o">(</span><span class="k">new</span> <span class="nc">Test1Interceptor</span><span class="o">())</span> <span class="c1">// 添加拦截器</span>
+				<span class="o">.</span><span class="na">addPathPatterns</span><span class="o">(</span><span class="s">"/**"</span><span class="o">)</span> <span class="c1">// 添加拦截路径</span>
+				<span class="o">.</span><span class="na">excludePathPatterns</span><span class="o">(</span><span class="c1">// 添加排除拦截路径</span>
+						<span class="s">"/hello"</span><span class="o">).</span><span class="na">order</span><span class="o">(</span><span class="mi">0</span><span class="o">);</span><span class="c1">//执行顺序</span>
+		<span class="kd">super</span><span class="o">.</span><span class="na">addInterceptors</span><span class="o">(</span><span class="n">registry</span><span class="o">);</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="3测试拦截器">3.测试拦截器</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@RestController</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestController</span> <span class="o">{</span>
+
+	<span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">"/hello"</span><span class="o">)</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">getHello</span><span class="o">()</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"这里是Hello"</span><span class="o">);</span>
+		<span class="k">return</span> <span class="s">"hello world"</span><span class="o">;</span>
+	<span class="o">}</span>
+	
+	
+	<span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">"/test1"</span><span class="o">)</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">getTest1</span><span class="o">()</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"这里是Test1"</span><span class="o">);</span>
+		<span class="k">return</span> <span class="s">"test1 content"</span><span class="o">;</span>
+	<span class="o">}</span>
+	
+	<span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">"/test2"</span><span class="o">)</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">getTest2</span><span class="o">()</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"这里是Test2"</span><span class="o">);</span>
+		<span class="k">return</span> <span class="s">"test2 content"</span><span class="o">;</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="4单个拦截器的执行流程">4.单个拦截器的执行流程</h4>
+
+<p>通过浏览器测试： http://127.0.0.1:8080/hello 结果：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>这里是Hello
+
+</code></pre></div></div>
+
+<p>http://127.0.0.1:8080/test1 、http://127.0.0.1:8080/test2 结果：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>执行preHandle方法--&gt;01
+这里是Test1
+执行postHandle方法--&gt;02
+执行afterCompletion方法--&gt;03
+
+</code></pre></div></div>
+
+<h3 id="多个拦截器">多个拦截器</h3>
+
+<h4 id="1新建两个拦截器">1.新建两个拦截器</h4>
+
+<p>Test1Interceptor</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Test1Interceptor</span> <span class="kd">implements</span> <span class="nc">HandlerInterceptor</span><span class="o">{</span>
+	
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">preHandle</span><span class="o">(</span><span class="nc">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span> <span class="nc">HttpServletResponse</span> <span class="n">response</span><span class="o">,</span> <span class="nc">Object</span> <span class="n">handler</span><span class="o">)</span>
+			<span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"执行Test1Interceptor preHandle方法--&gt;01"</span><span class="o">);</span>
+		<span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
+	<span class="o">}</span>
+	
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">postHandle</span><span class="o">(</span><span class="nc">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span> <span class="nc">HttpServletResponse</span> <span class="n">response</span><span class="o">,</span> <span class="nc">Object</span> <span class="n">handler</span><span class="o">,</span>
+			<span class="nc">ModelAndView</span> <span class="n">modelAndView</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"执行Test1Interceptor postHandle方法--&gt;02"</span><span class="o">);</span>
+	<span class="o">}</span>
+
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">afterCompletion</span><span class="o">(</span><span class="nc">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span> <span class="nc">HttpServletResponse</span> <span class="n">response</span><span class="o">,</span> <span class="nc">Object</span> <span class="n">handler</span><span class="o">,</span> <span class="nc">Exception</span> <span class="n">ex</span><span class="o">)</span>
+			<span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"执行Test1Interceptor afterCompletion方法--&gt;03"</span><span class="o">);</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<p>Test2Interceptor</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">public</span> <span class="kd">class</span> <span class="nc">Test2Interceptor</span> <span class="kd">extends</span> <span class="nc">HandlerInterceptorAdapter</span><span class="o">{</span>
+
+	<span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">preHandle</span><span class="o">(</span><span class="nc">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span> <span class="nc">HttpServletResponse</span> <span class="n">response</span><span class="o">,</span> <span class="nc">Object</span> <span class="n">handler</span><span class="o">)</span>
+			<span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"执行Test2Interceptor preHandle方法--&gt;01"</span><span class="o">);</span>
+		<span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
+	<span class="o">}</span>
+	
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">postHandle</span><span class="o">(</span><span class="nc">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span> <span class="nc">HttpServletResponse</span> <span class="n">response</span><span class="o">,</span> <span class="nc">Object</span> <span class="n">handler</span><span class="o">,</span>
+			<span class="nc">ModelAndView</span> <span class="n">modelAndView</span><span class="o">)</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"执行Test2Interceptor postHandle方法--&gt;02"</span><span class="o">);</span>
+	<span class="o">}</span>
+
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">afterCompletion</span><span class="o">(</span><span class="nc">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span> <span class="nc">HttpServletResponse</span> <span class="n">response</span><span class="o">,</span> <span class="nc">Object</span> <span class="n">handler</span><span class="o">,</span> <span class="nc">Exception</span> <span class="n">ex</span><span class="o">)</span>
+			<span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"执行Test2Interceptor afterCompletion方法--&gt;03"</span><span class="o">);</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+
+</code></pre></div></div>
+
+<h4 id="2配置拦截器-1">2.配置拦截器</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Configuration</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">WebMvcConfig</span> <span class="kd">extends</span> <span class="nc">WebMvcConfigurationSupport</span> <span class="o">{</span>
+	<span class="cm">/*
+	 * 拦截器配置
+	 */</span>
+	<span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">void</span> <span class="nf">addInterceptors</span><span class="o">(</span><span class="nc">InterceptorRegistry</span> <span class="n">registry</span><span class="o">)</span> <span class="o">{</span>
+		<span class="c1">// 注册自定义拦截器，添加拦截路径和排除拦截路径</span>
+		<span class="n">registry</span><span class="o">.</span><span class="na">addInterceptor</span><span class="o">(</span><span class="k">new</span> <span class="nc">Test1Interceptor</span><span class="o">())</span> <span class="c1">// 添加拦截器1</span>
+				<span class="o">.</span><span class="na">addPathPatterns</span><span class="o">(</span><span class="s">"/**"</span><span class="o">)</span> <span class="c1">// 添加拦截路径</span>
+				<span class="o">.</span><span class="na">excludePathPatterns</span><span class="o">(</span><span class="c1">// 添加排除拦截路径</span>
+						<span class="s">"/hello"</span><span class="o">)</span>
+				<span class="o">.</span><span class="na">order</span><span class="o">(</span><span class="mi">0</span><span class="o">);</span>
+		<span class="n">registry</span><span class="o">.</span><span class="na">addInterceptor</span><span class="o">(</span><span class="k">new</span> <span class="nc">Test2Interceptor</span><span class="o">())</span> <span class="c1">// 添加拦截器2</span>
+				<span class="o">.</span><span class="na">addPathPatterns</span><span class="o">(</span><span class="s">"/**"</span><span class="o">)</span> <span class="c1">// 添加拦截路径</span>
+				<span class="o">.</span><span class="na">excludePathPatterns</span><span class="o">(</span><span class="c1">// 添加排除拦截路径</span>
+						<span class="s">"/test1"</span><span class="o">)</span>
+				<span class="o">.</span><span class="na">order</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span>
+		<span class="kd">super</span><span class="o">.</span><span class="na">addInterceptors</span><span class="o">(</span><span class="n">registry</span><span class="o">);</span>
+	<span class="o">}</span>
+
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="3测试拦截器-1">3.测试拦截器</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@RestController</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">TestController</span> <span class="o">{</span>
+
+	<span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">"/hello"</span><span class="o">)</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">getHello</span><span class="o">()</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"这里是Hello"</span><span class="o">);</span>
+		<span class="k">return</span> <span class="s">"hello world"</span><span class="o">;</span>
+	<span class="o">}</span>
+	
+	
+	<span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">"/test1"</span><span class="o">)</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">getTest1</span><span class="o">()</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"这里是Test1"</span><span class="o">);</span>
+		<span class="k">return</span> <span class="s">"test1 content"</span><span class="o">;</span>
+	<span class="o">}</span>
+	
+	<span class="nd">@RequestMapping</span><span class="o">(</span><span class="s">"/test2"</span><span class="o">)</span>
+	<span class="kd">public</span> <span class="nc">String</span> <span class="nf">getTest2</span><span class="o">()</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"这里是Test2"</span><span class="o">);</span>
+		<span class="k">return</span> <span class="s">"test2 content"</span><span class="o">;</span>
+	<span class="o">}</span>
+<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="4多个拦截器的执行流程">4.多个拦截器的执行流程</h4>
+
+<p>通过浏览器测试： http://127.0.0.1:8080/test2 结果：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>执行Test1Interceptor preHandle方法--&gt;01
+执行Test2Interceptor preHandle方法--&gt;01
+这里是Test2
+执行Test2Interceptor postHandle方法--&gt;02
+执行Test1Interceptor postHandle方法--&gt;02
+执行Test2Interceptor afterCompletion方法--&gt;03
+执行Test1Interceptor afterCompletion方法--&gt;03
+
+</code></pre></div></div>
+
+<p>通过示例，简单的说多个拦截器执行流程就是<strong>先进后出</strong>。</p>
+
+<h3 id="简单的-token-判断示例">简单的 token 判断示例</h3>
+
+<h4 id="1拦截器">1.拦截器</h4>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nd">@Override</span>
+	<span class="kd">public</span> <span class="kt">boolean</span> <span class="nf">preHandle</span><span class="o">(</span><span class="nc">HttpServletRequest</span> <span class="n">request</span><span class="o">,</span> <span class="nc">HttpServletResponse</span> <span class="n">response</span><span class="o">,</span> <span class="nc">Object</span> <span class="n">handler</span><span class="o">)</span>
+			<span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+		<span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"执行Test1Interceptor preHandle方法--&gt;01"</span><span class="o">);</span>
+		
+		<span class="nc">String</span> <span class="n">token</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="na">getParameter</span><span class="o">(</span><span class="s">"token"</span><span class="o">);</span>
+		<span class="k">if</span> <span class="o">(</span><span class="nc">StringUtils</span><span class="o">.</span><span class="na">isEmpty</span><span class="o">(</span><span class="n">token</span><span class="o">))</span> <span class="o">{</span>			
+			<span class="n">response</span><span class="o">.</span><span class="na">setContentType</span><span class="o">(</span><span class="s">"text/html"</span><span class="o">);</span>
+			<span class="n">response</span><span class="o">.</span><span class="na">setCharacterEncoding</span><span class="o">(</span><span class="s">"UTF-8"</span><span class="o">);</span>
+			<span class="n">response</span><span class="o">.</span><span class="na">getWriter</span><span class="o">().</span><span class="na">println</span><span class="o">(</span><span class="s">"token不存在"</span><span class="o">);</span>
+			<span class="k">return</span> <span class="kc">false</span><span class="o">;</span>
+		<span class="o">}</span>
+		<span class="k">return</span> <span class="kc">true</span><span class="o">;</span>
+	<span class="o">}</span>
+
+</code></pre></div></div>
+
+<h4 id="2测试及结果">2.测试及结果</h4>
+
+<p>未传token：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>执行Test1Interceptor preHandle方法--&gt;01
+
+</code></pre></div></div>
+
+<p>传token：</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>执行Test1Interceptor preHandle方法--&gt;01
+页码：1
+页码大小：10
+执行Test1Interceptor postHandle方法--&gt;02
+执行Test1Interceptor afterCompletion方法--&gt;03
+</code></pre></div></div>
+
+<p>转载<a href="https://juejin.im/post/5dae915de51d4524ce22276c#heading-3">掘金</a></p>
+:ET

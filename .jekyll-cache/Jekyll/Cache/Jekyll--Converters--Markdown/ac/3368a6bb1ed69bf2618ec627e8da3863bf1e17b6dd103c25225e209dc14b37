@@ -1,0 +1,43 @@
+I"�<p>由于国产数据库没有相关文档说明，所以并不知道他的数据库标识是啥,刚好看到Mybatis官网说可以根据<code class="language-plaintext highlighter-rouge">DatabaseMetaData#getDatabaseProductName()</code> 返回的字符串去获取数据库的厂商标识！！那就直接获取看一看</p>
+
+<h2 id="关于">关于</h2>
+
+<p>MyBatis官网的介绍是MyBatis 可以根据不同的数据库厂商执行不同的语句，这种多厂商的支持是基于映射语句中的 <code class="language-plaintext highlighter-rouge">databaseId</code> 属性。 MyBatis 会加载带有匹配当前数据库 <code class="language-plaintext highlighter-rouge">databaseId</code> 属性和所有不带 <code class="language-plaintext highlighter-rouge">databaseId</code> 属性的语句。 如果同时找到带有 <code class="language-plaintext highlighter-rouge">databaseId</code> 和不带 <code class="language-plaintext highlighter-rouge">databaseId</code> 的相同语句，则后者会被舍弃。 为支持多厂商特性。</p>
+
+<h3 id="test类">test类</h3>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">org.junit.jupiter.api.Test</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.beans.factory.annotation.Autowired</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">org.springframework.boot.test.context.SpringBootTest</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">javax.sql.DataSource</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.sql.Connection</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.sql.SQLException</span><span class="o">;</span>
+
+<span class="nd">@SpringBootTest</span>
+<span class="kd">class</span> <span class="nc">Springboot03WebApplicationTests</span> <span class="o">{</span>
+    <span class="nd">@Autowired</span>
+    <span class="nc">DataSource</span> <span class="n">dataSource</span><span class="o">;</span>
+    <span class="nd">@Test</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">conn</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">SQLException</span><span class="o">{</span>
+        <span class="c1">//获得连接</span>
+        <span class="nc">Connection</span> <span class="n">connection</span> <span class="o">=</span>   <span class="n">dataSource</span><span class="o">.</span><span class="na">getConnection</span><span class="o">();</span>
+        <span class="nc">String</span> <span class="n">dbName</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="na">getMetaData</span><span class="o">().</span><span class="na">getDatabaseProductName</span><span class="o">();</span>
+        <span class="nc">String</span> <span class="n">dbVersion</span><span class="o">=</span><span class="n">connection</span><span class="o">.</span><span class="na">getMetaData</span><span class="o">().</span><span class="na">getDatabaseProductVersion</span><span class="o">();</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"数据库名称是："</span> <span class="o">+</span> <span class="n">dbName</span> <span class="o">+</span> <span class="s">"；版本是："</span> <span class="o">+</span> <span class="n">dbVersion</span><span class="o">);</span>
+        <span class="c1">//关闭连接</span>
+        <span class="n">connection</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+    <span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="相关对应">相关对应</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>金仓数据库8:KingbaseES
+神通数据库7:OSCAR
+达梦数据库8:DM DBMS
+</code></pre></div></div>
+
+<h2 id="参考">参考</h2>
+
+<p><a href="https://mybatis.org/mybatis-3/zh/configuration.html#databaseIdProvider">mybatis官方文档</a></p>
+:ET

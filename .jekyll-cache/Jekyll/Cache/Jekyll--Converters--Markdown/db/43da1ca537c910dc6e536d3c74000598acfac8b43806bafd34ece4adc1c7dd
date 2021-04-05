@@ -1,0 +1,43 @@
+I"B	<p>Postgresql使用笔记</p>
+
+<h1 id="postgresql">Postgresql</h1>
+
+<p>Postgresql配置日志 配置文件路径 在安装路径下的<strong>Postgresql.conf</strong></p>
+
+<blockquote>
+  <p>日志设置</p>
+</blockquote>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#设置日志路径</span>
+log_directory <span class="o">=</span> <span class="s1">'/opt/ops/logs'</span>      
+
+<span class="c">#日志的格式</span>
+log_destination <span class="o">=</span> <span class="s1">'csvlog,stderr'</span>         <span class="c"># stderr, csvlog, syslog, and eventlog,</span>
+                                      
+<span class="c">#日志的类型                                     </span>
+log_statement <span class="o">=</span> <span class="s1">'all'</span>                   <span class="c"># none, ddl, mod, all</span>
+
+logging_collector <span class="o">=</span> on  
+<span class="c">#日志文件名的格式</span>
+log_filename <span class="o">=</span> <span class="s1">'%Y-%m-%d.log'</span> 
+<span class="c">#文件默认的权限是0600</span>
+log_file_mode <span class="o">=</span> 0600
+<span class="c">#每个级别都包括以后的所有级别。级别越靠后，被发送的消息越少</span>
+log_min_messages <span class="o">=</span> debug1  <span class="c"># values in order of decreasing detail:</span>
+                                        <span class="c">#   debug5</span>
+                                        <span class="c">#   debug4</span>
+                                        <span class="c">#   debug3</span>
+                                        <span class="c">#   debug2</span>
+                                        <span class="c">#   debug1</span>
+                                        <span class="c">#   info</span>
+                                        <span class="c">#   notice</span>
+                                        <span class="c">#   warning</span>
+                                        <span class="c">#   error</span>
+                                        <span class="c">#   log</span>
+                                        <span class="c">#   fatal</span>
+                                        <span class="c">#   panic (effectively off)</span>
+
+log_min_error_statement <span class="o">=</span> debug1
+</code></pre></div></div>
+
+:ET

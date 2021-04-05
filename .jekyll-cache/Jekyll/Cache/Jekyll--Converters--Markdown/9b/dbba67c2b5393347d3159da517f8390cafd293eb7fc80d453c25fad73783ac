@@ -1,0 +1,24 @@
+I"�<p>碰巧用到了<strong>James</strong>向外网邮箱发信的需求,测试使用正常，记录下~</p>
+
+<p>1:需要能上网</p>
+
+<p>2:修改 <strong>${JAMES_ROOT}\conf\dnsservice.xml</strong>配置如下</p>
+
+<p><img src="https://i.opsta.cn/james/james-dns.png" alt="image" /></p>
+
+<p>修改 <strong>{JAMES_ROOT}\conf\mailetcontainer.xml</strong> 将这段注释</p>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">&lt;!--
+&lt;mailet match="RemoteAddrNotInNetwork=127.0.0.1" class="ToProcessor"&gt;
+&lt;processor&gt;relay-denied&lt;/processor&gt;
+&lt;notice&gt;550 - Requested action not taken: relaying denied&lt;/notice&gt;
+&lt;/mailet&gt;
+--&gt;</span>
+</code></pre></div></div>
+
+<p>smtp协议认证范围修改 <strong>{JAMES_ROOT}\conf\smtpserver.xml</strong></p>
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code>  <span class="nt">&lt;authorizedAddresses&gt;</span>*<span class="nt">&lt;/authorizedAddresses&gt;</span>
+</code></pre></div></div>
+<p>参考<a href="https://www.cnblogs.com/jacklondon/p/install_mail_server_at_windows_with_apache_james_3_3_for_internet.html">博客园</a></p>
+
+:ET

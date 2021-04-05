@@ -1,0 +1,22 @@
+---
+title: Blog
+permalink: /blog.html
+---
+
+<div class="page-title" id="programming">Blog</div>
+<div class="archive-main">
+  {% for post in site.posts limit %}
+  {% if post.type == 'legacy' %}
+  {% continue %}
+  {% endif %}
+  <div class="archive-item">
+    <div class="archive-date">{{ post.date | date: "%Y/%m/%d" }}</div>
+    <div class="archive-title"><a href="{{ site.url }}{{ post.url }}">{{ post.title }}</a></a></div>
+  </div>
+  {% endfor %}
+  <p class="archive-more">
+    <!-- <a href="/translation_posts.html">Translations</a> 
+    <a href="/legacy_posts.html">Legacy Posts</a>  -->
+    <a href="http://blog.opsta.cn/" target="_blank">Oldschool Blog</a>
+  </p>
+</div>

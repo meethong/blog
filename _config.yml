@@ -1,0 +1,52 @@
+# Site settings
+title: Meethong
+author: Meethong
+description: "Home page and blog of Meethong."
+url: "https://blog.opsta.cn"
+alt_url:
+  - "https://blog.opsta.cn"
+encoding: utf-8
+plugins:
+  - jekyll-sitemap
+markdown: kramdown
+kramdown:
+    input: GFM
+assets: /assets
+permalink: /:year/:month/:day/:title.html
+timezone: Asia/Shanghai
+collections:
+  docs:
+    output: true
+
+defaults:
+  - scope:
+      path: ""
+      type: docs
+    values:
+      layout: page
+      syntax_highlight: false
+permalink: /:year/:month/:day/:title.html
+# Contacts
+contact:
+  email: meethon98@gmail.com
+  github: meethong
+  instagram: meethong
+  twitter: meethong
+  
+
+# Applications
+ga:
+  tracking_id: UA-148080910-1
+disqus:
+  short_name: meethong
+
+# Inclusion
+include:
+  - _redirects
+
+# Exclusion
+exclude:
+  - Rakefile
+  - Gemfile
+  - Gemfile.lock
+  - assets/fonts/selection.json

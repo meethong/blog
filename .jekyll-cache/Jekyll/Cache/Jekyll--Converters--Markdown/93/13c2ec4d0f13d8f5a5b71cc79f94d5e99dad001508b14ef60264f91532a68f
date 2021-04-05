@@ -1,0 +1,96 @@
+I"�<p>Keepalived实现高可用,主备切换,日志配置</p>
+
+<h2 id="keepalived高可用">keepalived高可用</h2>
+
+<p>需要根据自己的配置进行修改,我这边是自己打的<a href="./2020-3-31-nginx-keepalived-builds">rpm</a>安装的所以就贴几个配置就ok了</p>
+
+<h3 id="master">master</h3>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>global_defs <span class="o">{</span>
+ router_id SERVER_1 <span class="c">#路由id号，不能重复</span>
+<span class="o">}</span>
+vrrp_script chk_server1 <span class="o">{</span> 
+    script <span class="s2">"/chek.sh"</span> <span class="c">#执行脚本</span>
+    interval 2 <span class="c">#间隔时间</span>
+    weight <span class="nt">-40</span>  <span class="c"># #优先级（如果脚本执行结果为0，并且weight配置的值大于0，则权重相应的增加，如果脚本执行结果非0，并且weight配置的值小于0，则优先级相应的减少）</span>
+<span class="o">}</span>             
+      
+ vrrp_instance VI_1 <span class="o">{</span>
+   state BACKUP <span class="c">#状态 master/backup</span>
+   interface ens33  <span class="c">#网卡</span>
+   virtual_router_id 55  <span class="c">#集群id必须一致</span>
+   priority 100  <span class="c">#权重</span>
+   advert_int 1 <span class="c">#主备通讯时间间隔</span>
+   authentication <span class="o">{</span>
+     auth_type PASS
+     auth_pass 1111 <span class="c">#认证号，集群中要一致</span>
+   <span class="o">}</span>
+   virtual_ipaddress <span class="o">{</span>
+     192.168.0.4/24 <span class="c">#使用的虚拟ip</span>
+   <span class="o">}</span>
+   track_script <span class="o">{</span> <span class="c">#调用上面定义的检查脚本</span>
+     chk_server1 
+   <span class="o">}</span>
+
+</code></pre></div></div>
+
+<h3 id="backup">backup</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vrrp_instance VI_1 {
+   state BACKUP 
+   interface ens33
+   virtual_router_id 55
+   priority 99
+   advert_int 1
+   authentication {
+     auth_type PASS
+     auth_pass 1111
+   }
+   virtual_ipaddress {
+     192.168.0.4/24
+   }
+
+</code></pre></div></div>
+
+<h3 id="cheksh">chek.sh</h3>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/bin/sh</span>
+<span class="nv">A</span><span class="o">=</span><span class="sb">`</span>ps <span class="nt">-C</span> nginx <span class="nt">--no-header</span> |wc <span class="nt">-l</span><span class="sb">`</span>
+<span class="k">if</span> <span class="o">[</span> <span class="nv">$A</span> <span class="nt">-eq</span> 0 <span class="o">]</span>
+<span class="k">then
+    </span><span class="nb">exit </span>1
+<span class="k">fi</span>
+</code></pre></div></div>
+
+<h2 id="日志配置">日志配置</h2>
+
+<p>默认日志在<strong>/var/log/messages</strong>里 可读性很低 需要修改</p>
+
+<p>修改<strong>/etc/sysconfig/keepalived</strong>  keepalived启动文件 按自己安装路径来</p>
+
+<p>把<strong>KEEPALIVED_OPTIONS=”-D”</strong> 修改为：<strong>KEEPALIVED_OPTIONS=”-D -d -S 0”</strong></p>
+
+<p><img src="https://i.opsta.cn/keepalived/keepalived-log.png" alt="keepalived-log" /></p>
+
+<p>再修改<strong>/etc/rsyslog.conf</strong></p>
+
+<p>添加   <strong>local0.*                                                /var/log/keepalived.log</strong></p>
+
+<p><img src="https://i.opsta.cn/rsyslog/rsyslog-keepalived-log.png" alt="image-20200528105508482" /></p>
+
+<p>目前的日志在:<strong>/var/log/keepalived.log</strong></p>
+
+<h2 id="切换成功">切换成功</h2>
+
+<p><strong>master切换</strong></p>
+
+<p><img src="https://i.opsta.cn/keepalived/keepalived-switch-master.png" alt="76" /></p>
+
+<p><strong>buckup切换</strong></p>
+
+<p><img src="https://i.opsta.cn/keepalived/keepalived-switch-buckup.png" alt="77" /></p>
+
+<h2 id="参考">参考</h2>
+
+<p><a href="http://www.linkops.cn/820.htm">keepalived配置高可用</a></p>
+:ET

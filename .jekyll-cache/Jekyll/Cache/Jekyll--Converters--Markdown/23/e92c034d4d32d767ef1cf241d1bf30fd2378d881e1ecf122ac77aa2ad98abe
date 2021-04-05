@@ -1,0 +1,104 @@
+I"s<p>Mariadb 10.0.38 编译安装基于 Centos Ubuntu类似 就不贴具体操作了，基本一样 安装相关依赖包即可。</p>
+
+<h2 id="mariadb-10038-编译安装">Mariadb 10.0.38 编译安装</h2>
+
+<p>1、下载源码包<a href="https://downloads.mariadb.org/interstitial/mariadb-10.0.38/source/mariadb-10.0.38.tar.gz/from/http%3A//mirrors.tuna.tsinghua.edu.cn/mariadb/">Mariadb源码包下载</a></p>
+
+<p>2、安装基础环境</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>yum  groupinstall <span class="nt">-y</span> Development Tools
+yum <span class="nt">-y</span> <span class="nb">install </span>ncurses-devel zlib-devel
+</code></pre></div></div>
+
+<p>3、编译</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cmake <span class="se">\</span>
+<span class="nt">-DCMAKE_INSTALL_PREFIX</span><span class="o">=</span>/opt/ops/mariadb <span class="se">\</span>
+<span class="nt">-DMYSQL_DATADIR</span><span class="o">=</span>/opt/ops/mariadb/data <span class="se">\</span>
+<span class="nt">-DSYSCONFDIR</span><span class="o">=</span>/opt/ops/mariadb <span class="se">\</span>
+<span class="nt">-DWITH_MYISAM_STORAGE_ENGINE</span><span class="o">=</span>1 <span class="se">\</span>
+<span class="nt">-DWITH_INNOBASE_STORAGE_ENGINE</span><span class="o">=</span>1 <span class="se">\</span>
+<span class="nt">-DWITH_MEMORY_STORAGE_ENGINE</span><span class="o">=</span>1 <span class="se">\</span>
+<span class="nt">-DWITH_READLINE</span><span class="o">=</span>1 <span class="se">\</span>
+<span class="nt">-DMYSQL_UNIX_ADDR</span><span class="o">=</span>/opt/ops/mariadb/data/mysql.sock <span class="se">\</span>
+<span class="nt">-DMYSQL_TCP_PORT</span><span class="o">=</span>8105 <span class="se">\</span>
+<span class="nt">-DENABLED_LOCAL_INFILE</span><span class="o">=</span>1 <span class="se">\</span>
+<span class="nt">-DWITH_PARTITION_STORAGE_ENGINE</span><span class="o">=</span>1 <span class="se">\</span>
+<span class="nt">-DDEFAULT_CHARSET</span><span class="o">=</span>utf8 <span class="se">\</span>
+<span class="nt">-DDEFAULT_COLLATION</span><span class="o">=</span>utf8_general_ci
+
+<span class="c">#编译并且安装</span>
+make <span class="o">&amp;&amp;</span> make <span class="nb">install</span>
+</code></pre></div></div>
+
+<p>4、生成mysql的配置文件</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">cp</span> /opt/ops/mariadb/support-files/my-medium.cnf /opt/ops/mariadb/my.cnf
+</code></pre></div></div>
+
+<p>5、修改mysql配置文件</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vim /opt/ops/mariadb/my.cnf   <span class="c">#在mysqld标签下加上以下内容</span>
+
+
+lower_case_table_names <span class="o">=</span> 1
+character-set-server<span class="o">=</span>utf8
+key_buffer_size <span class="o">=</span> 64M
+max_allowed_packet <span class="o">=</span> 10M
+table_open_cache <span class="o">=</span> 256
+sort_buffer_size <span class="o">=</span> 512K
+net_buffer_length <span class="o">=</span> 8K
+read_buffer_size <span class="o">=</span> 1M
+read_rnd_buffer_size <span class="o">=</span> 512K
+myisam_sort_buffer_size <span class="o">=</span> 16M
+<span class="nv">max_connections</span><span class="o">=</span>3000
+<span class="nv">thread_cache_size</span><span class="o">=</span>1000
+<span class="nv">max_connect_errors</span><span class="o">=</span>200
+<span class="nv">interactive_timeout</span><span class="o">=</span>600
+<span class="nv">wait_timeout</span><span class="o">=</span>3600
+<span class="nv">innodb_buffer_pool_size</span><span class="o">=</span>1000M
+read_buffer_size <span class="o">=</span> 256K
+query_cache_type <span class="o">=</span> 1
+query_cache_limit <span class="o">=</span> 512K
+query_cache_min_res_unit <span class="o">=</span> 2k
+<span class="nv">query_cache_size</span><span class="o">=</span>32M
+<span class="nv">tmp_table_size</span><span class="o">=</span>64M
+open_files_limit <span class="o">=</span> 65535
+</code></pre></div></div>
+
+<p>6、初始化数据库</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code> /opt/ops/mariadb/scripts/mysql_install_db <span class="nt">--user</span><span class="o">=</span>mysql <span class="nt">--datadir</span><span class="o">=</span>/opt/ops/mariadb/data/
+</code></pre></div></div>
+
+<p>7、生成Mariadb的启动脚本</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="nb">cp</span>  /opt/ops/mariadb/support-files/mysql.server  /opt/ops/mariadb/mysqld
+</code></pre></div></div>
+
+<p>8、将安装目录授权给mysql用户</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="nb">chown</span> <span class="nt">-R</span> mysql:mysql /opt/ops/mariadb
+</code></pre></div></div>
+
+<p>9、启动 Mariadb</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code> /opt/ops/mariadb/mysqld start
+</code></pre></div></div>
+
+<p>10、设置用户密码</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code> /opt/ops/mariadb/bin/mysqladmin <span class="nt">-u</span> root password <span class="s1">'ops123'</span>
+</code></pre></div></div>
+
+<p>11、授权在任意地方登陆</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>grant all on <span class="k">*</span>.<span class="k">*</span> to  <span class="s1">'root'</span>@<span class="s1">'%'</span> identified by <span class="s1">'ops123'</span><span class="p">;</span>
+</code></pre></div></div>
+
+<p>12、刷新授权</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code> flush privileges<span class="p">;</span>
+</code></pre></div></div>
+
+:ET

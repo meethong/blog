@@ -1,0 +1,70 @@
+I"�<p>Tiny Tiny RSS是一种基于Web的免费开放源新闻订阅（RSS / Atom）阅读器和汇总器</p>
+
+<h2 id="前提条件">前提条件</h2>
+
+<ul>
+  <li>
+    <p>切换Yum源为阿里云仓库</p>
+
+    <p><a href="https://developer.aliyun.com/mirror/centos?spm=a2c6h.13651102.0.0.3e221b11fjkN0F">阿里云仓库</a></p>
+  </li>
+  <li>
+    <p>安装Docke</p>
+
+    <p><a href="https://docs.docker.com/engine/install/centos/#prerequisites">安装文档</a></p>
+  </li>
+  <li>
+    <p>安装Docker Compose</p>
+
+    <p><a href="https://docs.docker.com/compose/install/">安装文档</a></p>
+    <h2 id="安装">安装</h2>
+  </li>
+</ul>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git clone https://git.tt-rss.org/fox/ttrss-docker-compose.git ttrss-docker <span class="o">&amp;&amp;</span> <span class="nb">cd </span>ttrss-docker
+</code></pre></div></div>
+
+<p>复制<code class="language-plaintext highlighter-rouge">.env-dist</code>到<code class="language-plaintext highlighter-rouge">.env</code>和编辑你需要改变任何相关的变量。</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">SELF_URL_PATH</code>在网络浏览器中打开时，您可能必须更改其名称，使其等于标准的tt-rss URL。如果此字段设置不正确，您可能会在tt-rss致命错误消息中看到正确的值。</li>
+</ul>
+
+<p>注意：容器重启时，会自动<code class="language-plaintext highlighter-rouge">SELF_URL_PATH</code>在生成的tt-rss中更新<code class="language-plaintext highlighter-rouge">config.php</code>。您无需为此进行<code class="language-plaintext highlighter-rouge">config.php</code>手动修改。</p>
+
+<ul>
+  <li>默认情况下，容器绑定到<strong>本地主机</strong>端口<strong>8280</strong>。如果你想在容器中在网上访问，而无需使用反向代理共享相同的主机，你将需要删除<code class="language-plaintext highlighter-rouge">127.0.0.1:</code>的<code class="language-plaintext highlighter-rouge">HTTP_PORT</code>变量<code class="language-plaintext highlighter-rouge">.env</code>。</li>
+</ul>
+
+<h4 id="构建并启动容器">构建并启动容器</h4>
+
+<div class="language-sh highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker-compose up <span class="nt">--build</span>
+</code></pre></div></div>
+
+<p>访问页面</p>
+
+<p><img src="https://i.opsta.cn/tt-rss/tt-rss-install-ok.png" alt="" /></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>默认管理员密码:admin/password
+</code></pre></div></div>
+
+<p>登陆自己导入一些订阅源 舒服了舒服了</p>
+
+<p><img src="https://i.opsta.cn/tt-rss/tt-rss-install-load.png" alt="" /></p>
+
+<p>可以把<code class="language-plaintext highlighter-rouge">Postgresql</code>从<code class="language-plaintext highlighter-rouge">Docker</code>中映射出来方便备份恢复 修改<code class="language-plaintext highlighter-rouge">docker-compose.yml</code></p>
+
+<p><img src="https://i.opsta.cn/tt-rss/tt-rss-postgresql-up.png" alt="" /></p>
+
+<h4 id="更新容器脚本">更新容器脚本</h4>
+
+<ol>
+  <li>停止容器： <code class="language-plaintext highlighter-rouge">docker-compose down &amp;&amp; docker-compose rm</code></li>
+  <li>从git：更新脚本，<code class="language-plaintext highlighter-rouge">git pull origin master</code>并对<code class="language-plaintext highlighter-rouge">.env</code>，等进行必要的修改。</li>
+  <li>重建并启动容器： <code class="language-plaintext highlighter-rouge">docker-compose up --build</code></li>
+</ol>
+
+<h2 id="参考">参考</h2>
+
+<p><a href="https://tt-rss.org/wiki/InstallationNotes">tt-rss安装文档</a></p>
+:ET

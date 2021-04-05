@@ -1,0 +1,113 @@
+I"�%<p>keepalived实现定时任务,其实crontab更好用。。。但是有的魔改linux无法使用crontab,就很无奈可能这就是**麒麟系统吧！</p>
+
+<h2 id="实现思路">实现思路</h2>
+
+<p>要定时去执行,不能用<strong>contab</strong>，那就只能用<strong>keepalived</strong>的检查服务 多少秒执行一次脚本，通过脚本去判断，如果当前时间等于这个时间那就执行</p>
+
+<h3 id="keeplived配置">keeplived配置</h3>
+
+<p><strong>keepalived</strong>主要是执行检查脚本,然后如果降权就跳备机 跳备机同时执行恢复数据库的操作</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+vrrp_script chk_server1 <span class="o">{</span> 
+    script <span class="s2">"/status.sh"</span> <span class="c">#执行脚本</span>
+    interval 2 <span class="c">#间隔时间</span>
+    weight <span class="nt">-40</span>  <span class="c"># #优先级（如果脚本执行结果为0，并且weight配置的值大于0，则权重相应的增加，如果脚本执行结果非0，并且weight配置的值小于0，则优先级相应的减少）</span>
+<span class="o">}</span>  
+track_script <span class="o">{</span> <span class="c">#调用上面定义的检查脚本</span>
+     chk_server1 
+   <span class="o">}</span>
+     notify_backup <span class="s2">"/etc/keepalived/regain.sh"</span> <span class="c">#状态为backup执行脚本</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+<h3 id="检测脚本">检测脚本</h3>
+
+<p>获取当前时间，先删除三个月以前的备份数据库,如果为晚上2点就执行备份，并且检测该文件存不存在如果存在就执行备份存在就不备份,当不是2点时就检测 <strong>Mysql,Ngiinx,Tomcat</strong>服务down就写info里面记录,成功就清空该文件,统计超过三次就给keepalived降权，然后就跳备机。</p>
+
+<p>第一次写<strong>shell</strong>，总感觉逻辑不是很通顺。。待改进吧，纯粹查命令写出来，</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/bin/sh</span>
+<span class="nv">hours</span><span class="o">=</span><span class="sb">`</span><span class="nb">date</span> +<span class="s2">"%H%M"</span><span class="sb">`</span>
+<span class="nv">static</span><span class="o">=</span>200
+<span class="nv">database</span><span class="o">=</span>/opt/keepalived/info/database<span class="sb">`</span><span class="nb">date</span> +<span class="s2">"%Y-%m-%d"</span><span class="sb">`</span>.sql
+<span class="nv">status</span><span class="o">=</span>/opt/keepalived/info/
+find <span class="nv">$status</span> <span class="nt">-mtime</span> +91 <span class="nt">-name</span> <span class="s2">"*.sql"</span> <span class="nt">-exec</span> <span class="nb">rm</span> <span class="nt">-rf</span> <span class="o">{}</span> <span class="se">\;</span>
+<span class="k">if</span> <span class="o">[</span> <span class="nv">$hours</span> <span class="nt">-eq</span> <span class="nv">$static</span> <span class="o">]</span><span class="p">;</span>
+ <span class="k">then
+   if</span> <span class="o">[</span> <span class="o">!</span> <span class="nt">-f</span> <span class="s2">"</span><span class="nv">$database</span><span class="s2">"</span> <span class="o">]</span><span class="p">;</span>
+   <span class="k">then</span>
+   /opt/mariadb/bin/mysqldump <span class="nt">-uroot</span> <span class="nt">-ppassword</span> database <span class="o">&gt;</span> <span class="nv">$database</span>
+   <span class="nb">echo</span> <span class="s2">"导出成功!"</span><span class="p">;</span>
+   <span class="k">else
+   </span><span class="nb">echo</span> <span class="s2">"文件已存在!"</span><span class="p">;</span>
+   <span class="k">fi
+else
+   </span><span class="nb">echo</span> <span class="s2">"开始服务检查"</span><span class="p">;</span>
+   <span class="sb">`</span><span class="nb">exec</span> <span class="o">&gt;</span>/dev/tcp/127.0.0.1/80<span class="sb">`</span>
+    <span class="k">if</span> <span class="o">[</span> <span class="nv">$?</span> <span class="nt">-ne</span> 0 <span class="o">]</span><span class="p">;</span>
+    <span class="k">then
+    </span><span class="nb">echo</span> <span class="s2">"nginx is down"</span><span class="p">;</span>
+    <span class="sb">`</span>systemctl start nginx<span class="sb">`</span>
+      <span class="o">[</span> <span class="nv">$?</span> <span class="nt">-ne</span> 0 <span class="o">]</span><span class="p">;</span>
+      <span class="nb">echo</span> <span class="s2">"nginx 无法启动"</span><span class="p">;</span>
+  
+        <span class="nb">echo </span>1 <span class="o">&gt;&gt;</span> <span class="nv">$status</span>/nginx.info
+    <span class="k">else
+        </span><span class="nb">echo</span> <span class="s2">"nginx 服务正常"</span><span class="p">;</span>
+        
+        <span class="nb">echo</span>  <span class="o">&gt;</span> <span class="nv">$status</span>/nginx.info
+      <span class="k">fi</span>
+       <span class="sb">`</span><span class="nb">exec</span> <span class="o">&gt;</span>/dev/tcp/127.0.0.1/8080<span class="sb">`</span>
+          <span class="k">if</span> <span class="o">[</span> <span class="nv">$?</span> <span class="nt">-ne</span> 0 <span class="o">]</span><span class="p">;</span>
+          <span class="k">then
+             </span><span class="nb">echo</span> <span class="s2">"tomcat is down"</span><span class="p">;</span>
+             <span class="sb">`</span>systemctl start tomcat<span class="sb">`</span>
+             <span class="o">[</span> <span class="nv">$?</span> <span class="nt">-ne</span> 0 <span class="o">]</span><span class="p">;</span>
+             <span class="nb">echo</span> <span class="s2">"Tomcat 无法启动"</span><span class="p">;</span>
+          
+               <span class="nb">echo </span>2 <span class="o">&gt;&gt;</span> <span class="nv">$status</span>/Tomcat.info
+             <span class="k">else
+             </span><span class="nb">echo</span> <span class="s2">"tomcat 服务正常"</span><span class="p">;</span>
+             <span class="nb">echo</span>  <span class="o">&gt;</span> <span class="nv">$status</span>/tomcat.info
+             <span class="k">fi</span> 
+               <span class="sb">`</span><span class="nb">exec</span> <span class="o">&gt;</span>/dev/tcp/127.0.0.1/3306<span class="sb">`</span>
+                 <span class="k">if</span> <span class="o">[</span> <span class="nv">$?</span> <span class="nt">-ne</span> 0 <span class="o">]</span><span class="p">;</span>
+                 <span class="k">then 
+                 </span><span class="nb">echo</span> <span class="s2">"mysql is down"</span><span class="p">;</span>
+                 <span class="sb">`</span>systemctl start mysql<span class="sb">`</span>
+                 <span class="o">[</span> <span class="nv">$?</span> <span class="nt">-gt</span> 0 <span class="o">]</span><span class="p">;</span>
+                  <span class="nb">echo</span> <span class="s2">"mysql 无法启动"</span><span class="p">;</span>
+                   <span class="nb">echo </span>3 <span class="o">&gt;&gt;</span> <span class="nv">$status</span>/mysql.info
+                 <span class="k">else
+                 </span><span class="nb">echo</span> <span class="s2">"mysql 服务正常"</span><span class="p">;</span>
+              <span class="nb">echo</span>  <span class="o">&gt;</span> <span class="nv">$status</span>/mysql.info
+          <span class="k">fi
+        if</span> <span class="o">[</span> <span class="sb">`</span><span class="nb">cat</span> <span class="nv">$status</span><span class="k">*</span>.info|wc <span class="nt">-w</span><span class="sb">`</span>  <span class="nt">-ge</span> 3 <span class="o">]</span>
+        <span class="k">then
+        </span><span class="nb">exit </span>1
+	<span class="k">else 
+        </span><span class="nb">exit </span>0
+       <span class="k">fi
+     fi</span>
+
+</code></pre></div></div>
+
+<h3 id="恢复脚本">恢复脚本</h3>
+
+<p>最好记录下日志说明什么时候恢复过。</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#!/bin/sh</span>
+<span class="nv">database</span><span class="o">=</span>/opt/keepalived/info/database<span class="sb">`</span><span class="nb">date</span> +<span class="s2">"%Y-%m-%d"</span><span class="sb">`</span>.sql
+<span class="nb">time</span><span class="o">=</span><span class="sb">`</span><span class="nb">date</span> <span class="s2">"+%Y_%m_%d %H:%M:%S"</span><span class="sb">`</span>
+<span class="nv">update</span><span class="o">=</span>/opt/keepalived/info/update.txt
+/opt/mariadb/bin/mysql <span class="nt">-hIP</span> <span class="nt">-uroot</span> <span class="nt">-ppassword</span> database  &lt; <span class="nv">$database</span>
+ <span class="k">if</span>   <span class="o">[</span> <span class="nv">$?</span> <span class="nt">-ne</span> 0 <span class="o">]</span><span class="p">;</span>
+    <span class="k">then
+    </span><span class="nb">echo</span> <span class="s2">"</span><span class="nv">$time</span><span class="s2">数据库以</span><span class="nv">$database</span><span class="s2">恢复失败"</span> <span class="o">&gt;&gt;</span> <span class="nv">$update</span>
+    <span class="k">else
+    </span><span class="nb">echo</span> <span class="s2">"</span><span class="nv">$time</span><span class="s2">数据库以</span><span class="nv">$database</span><span class="s2">恢复成功"</span> <span class="o">&gt;&gt;</span> <span class="nv">$update</span>
+<span class="k">fi</span>
+</code></pre></div></div>
+
+:ET

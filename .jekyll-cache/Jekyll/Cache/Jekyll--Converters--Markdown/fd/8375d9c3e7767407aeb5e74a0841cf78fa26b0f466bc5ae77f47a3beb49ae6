@@ -1,0 +1,326 @@
+I"N'<section class="archive-main">
+
+
+<h3>DatabaseIdProvider</h3>
+<ol class="posts-list" id="DatabaseIdProvider">
+
+<ul class="posts-list-item">
+<span class="posts-list-meta">2020-06-09</span>
+ <a class="posts-list-name" href="https://blog.opsta.cn/2020/06/09/springboot-mybatis-datebase.html">Mybatis获取国产数据库厂商标识</a>
+</ul>
+
+</ol>
+
+<h3>Docker</h3>
+<ol class="posts-list" id="Docker">
+
+<ul class="posts-list-item">
+<span class="posts-list-meta">2020-07-30</span>
+ <a class="posts-list-name" href="https://blog.opsta.cn/2020/07/30/docker-compose.html">Docker Compose学习</a>
+</ul>
+
+<ul class="posts-list-item">
+<span class="posts-list-meta">2020-07-04</span>
+ <a class="posts-list-name" href="https://blog.opsta.cn/2020/07/04/docker-windonws.html">windonws 10部署使用Docker</a>
+</ul>
+
+<ul class="posts-list-item">
+<span class="posts-list-meta">2020-06-25</span>
+ <a class="posts-list-name" href="https://blog.opsta.cn/2020/06/25/docker-network.html">Docker笔记第四天</a>
+</ul>
+
+<ul class="posts-list-item">
+<span class="posts-list-meta">2020-06-21</span>
+ <a class="posts-list-name" href="https://blog.opsta.cn/2020/06/21/docker-dockerfile.html">Docker笔记第三天</a>
+</ul>
+
+<ul class="posts-list-item">
+<span class="posts-list-meta">2020-06-20</span>
+ <a class="posts-list-name" href="https://blog.opsta.cn/2020/06/20/docker-exercise.html">Docker笔记第二天</a>
+</ul>
+
+<ul class="posts-list-item">
+<span class="posts-list-meta">2020-06-18</span>
+ <a class="posts-list-name" href="https://blog.opsta.cn/2020/06/18/docker-install.html">Docker笔记第一天</a>
+</ul>
+
+<ul class="posts-list-item">
+<span class="posts-list-meta">2020-06-05</span>
+ <a class="posts-list-name" href="https://blog.opsta.cn/2020/06/05/docker-install-ttrss.html">在Centos上用Docker安装tt-rss</a>
+</ul>
+
+</ol>
+
+<h3>Elasticsearch</h3>
+<ol class="posts-list" id="Elasticsearch">
+
+<ul class="posts-list-item">
+<span class="posts-list-meta">2020-05-27</span>
+ <a class="posts-list-name" href="https://blog.opsta.cn/2020/05/27/elk-install.html">安装ELK日志分析系统</a>
+</ul>
+
+</ol>
+
+<h3>Git</h3>
+<ol class="posts-list" id="Git">
+
+<ul class="posts-list-item">
+<span class="posts-list-meta">2020-05-23</span>
+ <a class="posts-list-name" href="https://blog.opsta.cn/2020/05/23/git-ops.html">Git操作笔记</a>
+</ul>
+
+</ol>
+
+<h3>Interceptor</h3>
+<ol class="posts-list" id="Interceptor">
+
+<ul class="posts-list-item">
+<span class="posts-list-meta">2020-06-07</span>
+ <a class="posts-list-name" href="https://blog.opsta.cn/2020/06/07/springboot-Interceptor.html">Spring MVC拦截器</a>
+</ul>
+
+</ol>
+
+<h3>James</h3>
+<ol class="posts-list" id="James">
+
+<ul class="posts-list-item">
+<span class="posts-list-meta">2021-01-05</span>
+ <a class="posts-list-name" href="https://blog.opsta.cn/2021/01/05/james.html">使用James邮箱向外网邮箱发信</a>
+</ul>
+
+</ol>
+
+<h3>Keepalived</h3>
+<ol class="posts-list" id="Keepalived">
+
+<ul class="posts-list-item">
+<span class="posts-list-meta">2020-05-30</span>
+ <a class="posts-list-name" href="https://blog.opsta.cn/2020/05/30/keepalived-time.html">Keepalived实现定时任务</a>
+</ul>
+
+<ul class="posts-list-item">
+<span class="posts-list-meta">2020-05-28</span>
+ <a class="posts-list-name" href="https://blog.opsta.cn/2020/05/28/keepalived-switch.html">Keepalived实现高可用</a>
+</ul>
+
+<ul class="posts-list-item">
+<span class="posts-list-meta">2020-03-31</span>
+ <a class="posts-list-name" href="https://blog.opsta.cn/2020/03/31/nginx-keepalived-builds.html">Nginx+Keepalived打成rpm安装包</a>
+</ul>
+
+<ul class="posts-list-item">
+<span class="posts-list-meta">2020-03-27</span>
+ <a class="posts-list-name" href="https://blog.opsta.cn/2020/03/27/keepalived-build.html">Keepalived-2.0.20编译安装</a>
+</ul>
+
+</ol>
+
+<h3>Kibana</h3>
+<ol class="posts-list" id="Kibana">
+
+<ul class="posts-list-item">
+<span class="posts-list-meta">2020-05-27</span>
+ <a class="posts-list-name" href="https://blog.opsta.cn/2020/05/27/elk-install.html">安装ELK日志分析系统</a>
+</ul>
+
+</ol>
+
+<h3>Linux</h3>
+<ol class="posts-list" id="Linux">
+
+<ul class="posts-list-item">
+<span class="posts-list-meta">2020-05-01</span>
+ <a class="posts-list-name" href="https://blog.opsta.cn/2020/05/01/linux-lsof-command.html">lsof命令讲解</a>
+</ul>
+
+<ul class="posts-list-item">
+<span class="posts-list-meta">2020-04-30</span>
+ <a class="posts-list-name" href="https://blog.opsta.cn/2020/04/30/linux-ops.html">Linux小技巧</a>
+</ul>
+
+</ol>
+
+<h3>Logstash</h3>
+<ol class="posts-list" id="Logstash">
+
+<ul class="posts-list-item">
+<span class="posts-list-meta">2020-05-27</span>
+ <a class="posts-list-name" href="https://blog.opsta.cn/2020/05/27/elk-install.html">安装ELK日志分析系统</a>
+</ul>
+
+</ol>
+
+<h3>MariaDB</h3>
+<ol class="posts-list" id="MariaDB">
+
+<ul class="posts-list-item">
+<span class="posts-list-meta">2020-11-10</span>
+ <a class="posts-list-name" href="https://blog.opsta.cn/2020/11/10/mariadb-build-so.html">MariaDB源码编译安装指定so库文件，加载路径</a>
+</ul>
+
+<ul class="posts-list-item">
+<span class="posts-list-meta">2020-06-23</span>
+ <a class="posts-list-name" href="https://blog.opsta.cn/2020/06/23/mariadb10.0.38-build.html">Mariadb 10.0.38 编译安装</a>
+</ul>
+
+<ul class="posts-list-item">
+<span class="posts-list-meta">2020-03-25</span>
+ <a class="posts-list-name" href="https://blog.opsta.cn/2020/03/25/rpmbuild-mariadb.html">rpmbuild打包mariadb集群</a>
+</ul>
+
+<ul class="posts-list-item">
+<span class="posts-list-meta">2020-03-23</span>
+ <a class="posts-list-name" href="https://blog.opsta.cn/2020/03/23/mariadb-build.html">MariaDB Galera编译安装</a>
+</ul>
+
+<ul class="posts-list-item">
+<span class="posts-list-meta">2020-03-18</span>
+ <a class="posts-list-name" href="https://blog.opsta.cn/2020/03/18/mariadb-cluster.html">MariaDB,Galera多主集群安装</a>
+</ul>
+
+</ol>
+
+<h3>Mybatis</h3>
+<ol class="posts-list" id="Mybatis">
+
+<ul class="posts-list-item">
+<span class="posts-list-meta">2020-06-09</span>
+ <a class="posts-list-name" href="https://blog.opsta.cn/2020/06/09/springboot-mybatis-datebase.html">Mybatis获取国产数据库厂商标识</a>
+</ul>
+
+</ol>
+
+<h3>Nginx</h3>
+<ol class="posts-list" id="Nginx">
+
+<ul class="posts-list-item">
+<span class="posts-list-meta">2020-05-13</span>
+ <a class="posts-list-name" href="https://blog.opsta.cn/2020/05/13/nginx-proxy.html">Nginx反向代理谷歌镜像</a>
+</ul>
+
+<ul class="posts-list-item">
+<span class="posts-list-meta">2020-04-30</span>
+ <a class="posts-list-name" href="https://blog.opsta.cn/2020/04/30/linux-ops.html">Linux小技巧</a>
+</ul>
+
+<ul class="posts-list-item">
+<span class="posts-list-meta">2020-03-31</span>
+ <a class="posts-list-name" href="https://blog.opsta.cn/2020/03/31/nginx-keepalived-builds.html">Nginx+Keepalived打成rpm安装包</a>
+</ul>
+
+<ul class="posts-list-item">
+<span class="posts-list-meta">2020-03-29</span>
+ <a class="posts-list-name" href="https://blog.opsta.cn/2020/03/29/nginx-build.html">Nginx-1.17.9编译安装</a>
+</ul>
+
+</ol>
+
+<h3>Postgresql</h3>
+<ol class="posts-list" id="Postgresql">
+
+<ul class="posts-list-item">
+<span class="posts-list-meta">2020-07-02</span>
+ <a class="posts-list-name" href="https://blog.opsta.cn/2020/07/02/postgresql.html">Postgresql笔记</a>
+</ul>
+
+</ol>
+
+<h3>Redis</h3>
+<ol class="posts-list" id="Redis">
+
+<ul class="posts-list-item">
+<span class="posts-list-meta">2020-06-12</span>
+ <a class="posts-list-name" href="https://blog.opsta.cn/2020/06/12/redis-command.html">Redis常用命令</a>
+</ul>
+
+</ol>
+
+<h3>Shell</h3>
+<ol class="posts-list" id="Shell">
+
+<ul class="posts-list-item">
+<span class="posts-list-meta">2020-05-30</span>
+ <a class="posts-list-name" href="https://blog.opsta.cn/2020/05/30/keepalived-time.html">Keepalived实现定时任务</a>
+</ul>
+
+</ol>
+
+<h3>Solr</h3>
+<ol class="posts-list" id="Solr">
+
+<ul class="posts-list-item">
+<span class="posts-list-meta">2020-04-13</span>
+ <a class="posts-list-name" href="https://blog.opsta.cn/2020/04/13/solr-stack.html">Solr指定的堆栈大小报错</a>
+</ul>
+
+</ol>
+
+<h3>Springboot</h3>
+<ol class="posts-list" id="Springboot">
+
+<ul class="posts-list-item">
+<span class="posts-list-meta">2020-06-09</span>
+ <a class="posts-list-name" href="https://blog.opsta.cn/2020/06/09/springboot-mybatis-datebase.html">Mybatis获取国产数据库厂商标识</a>
+</ul>
+
+<ul class="posts-list-item">
+<span class="posts-list-meta">2020-06-07</span>
+ <a class="posts-list-name" href="https://blog.opsta.cn/2020/06/07/springboot-Interceptor.html">Spring MVC拦截器</a>
+</ul>
+
+</ol>
+
+<h3>Sublime</h3>
+<ol class="posts-list" id="Sublime">
+
+<ul class="posts-list-item">
+<span class="posts-list-meta">2020-05-20</span>
+ <a class="posts-list-name" href="https://blog.opsta.cn/2020/05/20/sublime-ops.html">Sublime小技巧</a>
+</ul>
+
+</ol>
+
+<h3>TT-RSS</h3>
+<ol class="posts-list" id="TT-RSS">
+
+<ul class="posts-list-item">
+<span class="posts-list-meta">2020-06-05</span>
+ <a class="posts-list-name" href="https://blog.opsta.cn/2020/06/05/docker-install-ttrss.html">在Centos上用Docker安装tt-rss</a>
+</ul>
+
+</ol>
+
+<h3>rpmbuild</h3>
+<ol class="posts-list" id="rpmbuild">
+
+<ul class="posts-list-item">
+<span class="posts-list-meta">2020-03-31</span>
+ <a class="posts-list-name" href="https://blog.opsta.cn/2020/03/31/nginx-keepalived-builds.html">Nginx+Keepalived打成rpm安装包</a>
+</ul>
+
+<ul class="posts-list-item">
+<span class="posts-list-meta">2020-03-29</span>
+ <a class="posts-list-name" href="https://blog.opsta.cn/2020/03/29/nginx-build.html">Nginx-1.17.9编译安装</a>
+</ul>
+
+<ul class="posts-list-item">
+<span class="posts-list-meta">2020-03-25</span>
+ <a class="posts-list-name" href="https://blog.opsta.cn/2020/03/25/rpmbuild-mariadb.html">rpmbuild打包mariadb集群</a>
+</ul>
+
+</ol>
+
+<h3>心灵鸡汤</h3>
+<ol class="posts-list" id="心灵鸡汤">
+
+<ul class="posts-list-item">
+<span class="posts-list-meta">2020-06-05</span>
+ <a class="posts-list-name" href="https://blog.opsta.cn/2020/06/05/sould-life.html">V2EX上的心灵鸡汤</a>
+</ul>
+
+</ol>
+
+</section>
+
+:ET

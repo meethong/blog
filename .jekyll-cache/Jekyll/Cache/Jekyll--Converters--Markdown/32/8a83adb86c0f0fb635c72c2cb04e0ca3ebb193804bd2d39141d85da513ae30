@@ -1,0 +1,13 @@
+I"�<p>记录自己常用快捷的git操作</p>
+
+<h2 id="设置socket5代理">设置socket5代理</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>git config --global http.proxy socks5://127.0.0.1:10808
+git config --global https.proxy socks5://127.0.0.1:10808
+</code></pre></div></div>
+
+<h2 id="参考文档">参考文档</h2>
+
+<p><a href="https://git-scm.com/docs/git">官方文档</a></p>
+
+:ET

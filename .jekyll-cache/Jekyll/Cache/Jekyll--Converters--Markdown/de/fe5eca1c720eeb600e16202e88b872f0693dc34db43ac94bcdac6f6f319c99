@@ -1,0 +1,66 @@
+I"�<p>elasticsearch 7.7安装,走了不少弯路,还好自己记录了一下,配置不对很容易出问题！！！</p>
+
+<h2 id="安装">安装</h2>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rpm <span class="nt">--import</span> https://artifacts.elastic.co/GPG-KEY-elasticsearch
+配置yum源
+<span class="o">[</span>root@instance-3 ~]# more /etc/yum.repos.d/log.repo 
+<span class="o">[</span>logstash-7.x]
+<span class="nv">name</span><span class="o">=</span>Elastic repository <span class="k">for </span>7.x packages
+<span class="nv">baseurl</span><span class="o">=</span>https://artifacts.elastic.co/packages/7.x/yum
+<span class="nv">gpgcheck</span><span class="o">=</span>1
+<span class="nv">gpgkey</span><span class="o">=</span>https://artifacts.elastic.co/GPG-KEY-elasticsearch
+<span class="nv">enabled</span><span class="o">=</span>1
+<span class="nv">autorefresh</span><span class="o">=</span>1
+<span class="nb">type</span><span class="o">=</span>rpm-md
+</code></pre></div></div>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>yum <span class="nb">install </span>logstash <span class="c">#安装logstash</span>
+
+rpm <span class="nt">-ivh</span> https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-7.7.0-x86_64.rpm  <span class="c">#安装elasticsearch</span>
+</code></pre></div></div>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rpm <span class="nt">-ivh</span> https://artifacts.elastic.co/downloads/kibana/kibana-7.7.0-x86_64.rpm <span class="c">#安装kibana</span>
+</code></pre></div></div>
+
+<p>安装完需要配置一下</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vim /etc/elasticsearch/jvm.options
+# 根据实际情况修改 jvm内存
+-Xms128m
+-Xmx256m
+</code></pre></div></div>
+
+<h3 id="elasticsearch配置">elasticsearch配置</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vim /etc/elasticsearch/elasticsearch.yml
+node.data : true
+network.host: 0.0.0.0
+discovery.seed_hosts : ["127.0.0.1"]
+cluster.initial_master_nodes : ["instance-3"] #根据自己主机名修改
+</code></pre></div></div>
+
+<h3 id="kibana配置">kibana配置</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vim /etc/kibana/kibana.yml 
+server.host: "0.0.0.0" #此host必须修改外部用户将无法访问
+</code></pre></div></div>
+
+<h2 id="启停">启停</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>systemctl start elasticsearch 
+systemctl start  kibana 
+</code></pre></div></div>
+
+<h2 id="日志">日志</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>tail -f /var/log/elasticsearch/elasticsearch.log
+tail -f /var/log/kibana/kibana.stdout
+</code></pre></div></div>
+
+<h2 id="参考">参考</h2>
+
+<p><a href="https://www.cnblogs.com/fishbook/p/9370089.html">十分钟搭建和使用ELK日志分析系统</a></p>
+
+<p><a href="https://www.elastic.co/guide/index.html">官方文档</a></p>
+:ET

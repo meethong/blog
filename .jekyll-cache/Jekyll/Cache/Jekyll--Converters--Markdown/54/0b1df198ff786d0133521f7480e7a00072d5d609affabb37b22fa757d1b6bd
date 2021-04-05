@@ -1,0 +1,550 @@
+I"_�<p>最新的 Centos7 安装 Docker 19.03.11,本文基于Centos7安装测试，务必保持环境一致</p>
+
+<h1 id="安装docker">安装Docker</h1>
+
+<h3 id="环境查看">环境查看</h3>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 1.查看内核</span>
+<span class="o">[</span>root@localhost yum.repos.d]# <span class="nb">uname</span> <span class="nt">-r</span>
+3.10.0-693.el7.x86_64
+<span class="c"># 2.查看系统版本</span>
+<span class="o">[</span>root@localhost yum.repos.d]# <span class="nb">cat</span> /etc/os-release 
+<span class="nv">NAME</span><span class="o">=</span><span class="s2">"CentOS Linux"</span>
+<span class="nv">VERSION</span><span class="o">=</span><span class="s2">"7 (Core)"</span>
+<span class="nv">ID</span><span class="o">=</span><span class="s2">"centos"</span>
+<span class="nv">ID_LIKE</span><span class="o">=</span><span class="s2">"rhel fedora"</span>
+<span class="nv">VERSION_ID</span><span class="o">=</span><span class="s2">"7"</span>
+<span class="nv">PRETTY_NAME</span><span class="o">=</span><span class="s2">"CentOS Linux 7 (Core)"</span>
+<span class="nv">ANSI_COLOR</span><span class="o">=</span><span class="s2">"0;31"</span>
+<span class="nv">CPE_NAME</span><span class="o">=</span><span class="s2">"cpe:/o:centos:centos:7"</span>
+<span class="nv">HOME_URL</span><span class="o">=</span><span class="s2">"https://www.centos.org/"</span>
+<span class="nv">BUG_REPORT_URL</span><span class="o">=</span><span class="s2">"https://bugs.centos.org/"</span>
+
+<span class="nv">CENTOS_MANTISBT_PROJECT</span><span class="o">=</span><span class="s2">"CentOS-7"</span>
+<span class="nv">CENTOS_MANTISBT_PROJECT_VERSION</span><span class="o">=</span><span class="s2">"7"</span>
+<span class="nv">REDHAT_SUPPORT_PRODUCT</span><span class="o">=</span><span class="s2">"centos"</span>
+<span class="nv">REDHAT_SUPPORT_PRODUCT_VERSION</span><span class="o">=</span><span class="s2">"7"</span>
+
+</code></pre></div></div>
+
+<h3 id="安装">安装</h3>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 1.卸载旧的版本</span>
+yum remove docker <span class="se">\</span>
+                  docker-client <span class="se">\</span>
+                  docker-client-latest <span class="se">\</span>
+                  docker-common <span class="se">\</span>
+                  docker-latest <span class="se">\</span>
+                  docker-latest-logrotate <span class="se">\</span>
+                  docker-logrotate <span class="se">\</span>
+                  docker-engine
+<span class="c"># 2.需要的安装包</span>
+yum <span class="nb">install</span> <span class="nt">-y</span> yum-utils
+<span class="c"># 3.设置阿里云安装镜像</span>
+yum-config-manager <span class="nt">--add-repo</span> http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo 
+<span class="c"># 4.安装docker</span>
+yum <span class="nb">install </span>docker-ce docker-ce-cli containerd.io
+<span class="c"># 5.启动docker</span>
+systemctl start docker
+<span class="c"># 6.查看docker版本</span>
+<span class="o">[</span>root@localhost yum.repos.d]# docker version
+Client: Docker Engine - Community
+ Version:           19.03.11
+ API version:       1.40
+ Go version:        go1.13.10
+ Git commit:        42e35e61f3
+ Built:             Mon Jun  1 09:13:48 2020
+ OS/Arch:           linux/amd64
+ Experimental:      <span class="nb">false
+
+</span>Server: Docker Engine - Community
+ Engine:
+  Version:          19.03.11
+  API version:      1.40 <span class="o">(</span>minimum version 1.12<span class="o">)</span>
+  Go version:       go1.13.10
+  Git commit:       42e35e61f3
+  Built:            Mon Jun  1 09:12:26 2020
+  OS/Arch:          linux/amd64
+  Experimental:     <span class="nb">false
+ </span>containerd:
+  Version:          1.2.13
+  GitCommit:        7ad184331fa3e55e52b890ea95e65ba581ae3429
+ runc:
+  Version:          1.0.0-rc10
+  GitCommit:        dc9208a3303feef5b3839f4323d9beb36df0a9dd
+ docker-init:
+  Version:          0.18.0
+  GitCommit:        fec3683
+
+</code></pre></div></div>
+
+<h3 id="镜像加速">镜像加速</h3>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vim /etc/docker/daemon.json <span class="c">#修改配置文件</span>
+<span class="o">[</span>root@localhost ~]# more /etc/docker/daemon.json
+<span class="o">{</span>
+    <span class="s2">"registry-mirrors"</span>: <span class="o">[</span>
+        <span class="s2">"https://docker.mirrors.ustc.edu.cn"</span>,
+        <span class="s2">"https://registry.docker-cn.com"</span>
+    <span class="o">]</span>
+<span class="o">}</span>
+
+<span class="c">#重启服务生效</span>
+systemctl daemon-reload 
+systemctl restart docker
+</code></pre></div></div>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="c"># 7.hello world</span>
+docker run hello-world
+</code></pre></div></div>
+
+<p><img src="https://i.opsta.cn/docker/docker-helloworld.png" alt="docker-helloworld" /></p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 8 查看docker镜像</span>
+<span class="o">[</span>root@localhost yum.repos.d]# docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+hello-world         latest              bf756fb1ae65        5 months ago        13.3kB
+</code></pre></div></div>
+
+<h3 id="卸载">卸载</h3>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 1.卸载依赖</span>
+yum remove docker-ce docker-ce-cli containerd.io
+<span class="c"># 2.删除资源</span>
+<span class="nb">rm</span> <span class="nt">-rf</span> /var/lib/docker
+</code></pre></div></div>
+
+<h3 id="常用命令">常用命令</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker version #显示docker的版本信息
+docker info #显示docker的系统信息 包括镜像和容器的数量
+docker 命令 --help #帮助命令
+</code></pre></div></div>
+
+<p><a href="https://docs.docker.com/engine/reference/commandline/cli/">docker官方命令参考手册</a></p>
+
+<h2 id="镜像命令">镜像命令</h2>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost yum.repos.d]# docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+hello-world         latest              bf756fb1ae65        5 months ago        13.3kB
+
+<span class="c"># 解释</span>
+REPOSITORY   镜像的仓库
+TAG          镜像的标签
+IMAGE ID     镜像的ID
+CREATED 	 镜像的创建时间
+SIZE  		 镜像的大小
+<span class="c"># 可选项</span>
+<span class="nt">-a</span>, <span class="nt">--all</span>   <span class="c">#列出所有的镜像</span>
+<span class="nt">-q</span>, <span class="nt">--quiet</span> <span class="c">#只列出镜像的ID</span>
+
+</code></pre></div></div>
+
+<h3 id="docker-search-搜索镜像">docker search 搜索镜像</h3>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost yum.repos.d]# docker search java
+NAME                                     DESCRIPTION                                     STARS               OFFICIAL            AUTOMATED
+node                                     Node.js is a JavaScript-based platform <span class="k">for </span>s…   8940                <span class="o">[</span>OK]                
+tomcat                                   Apache Tomcat is an open <span class="nb">source </span>implementati…   2756                <span class="o">[</span>OK]                
+
+<span class="c">#可选项 通过搜藏来过滤</span>
+<span class="nt">--filter</span><span class="o">=</span><span class="nv">STARS</span><span class="o">=</span>3000 <span class="c">#搜索出来的镜像STARS大于3000的</span>
+<span class="o">[</span>root@localhost /]# docker search mysql <span class="nt">--filter</span><span class="o">=</span><span class="nv">STARS</span><span class="o">=</span>3000
+NAME                DESCRIPTION                                     STARS               OFFICIAL            AUTOMATED
+mysql               MySQL is a widely used, open-source relation…   9645                <span class="o">[</span>OK]                
+mariadb             MariaDB is a community-developed fork of MyS…   3506                <span class="o">[</span>OK]      
+</code></pre></div></div>
+
+<h3 id="docker-pull-下载镜像">docker pull 下载镜像</h3>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost /]# docker pull mysql
+Using default tag: latest <span class="c">#如果不写tag 默认就是latest</span>
+latest: Pulling from library/mysql
+8559a31e96f4: Pull <span class="nb">complete</span> <span class="c">#分层下载 docker image的核心 联合文件系统</span>
+d51ce1c2e575: Pull <span class="nb">complete 
+</span>c2344adc4858: Pull <span class="nb">complete 
+</span>fcf3ceff18fc: Pull <span class="nb">complete 
+</span>16da0c38dc5b: Pull <span class="nb">complete 
+</span>b905d1797e97: Pull <span class="nb">complete 
+</span>4b50d1c6b05c: Pull <span class="nb">complete 
+</span>c75914a65ca2: Pull <span class="nb">complete 
+</span>1ae8042bdd09: Pull <span class="nb">complete 
+</span>453ac13c00a3: Pull <span class="nb">complete 
+</span>9e680cd72f08: Pull <span class="nb">complete 
+</span>a6b5dc864b6c: Pull <span class="nb">complete 
+</span>Digest: sha256:8b7b328a7ff6de46ef96bcf83af048cb00a1c86282bfca0cb119c84568b4caf6 <span class="c">#签名</span>
+Status: Downloaded newer image <span class="k">for </span>mysql:latest
+docker.io/library/mysql:latest <span class="c">#真实地址</span>
+
+<span class="c">#指定版本下载</span>
+<span class="o">[</span>root@localhost /]# docker pull mysql:5.7
+5.7: Pulling from library/mysql
+5.7: Pulling from library/mysql
+8559a31e96f4: Already exists 
+d51ce1c2e575: Already exists 
+c2344adc4858: Already exists 
+fcf3ceff18fc: Already exists 
+16da0c38dc5b: Already exists 
+b905d1797e97: Already exists 
+4b50d1c6b05c: Already exists 
+d85174a87144: Pull <span class="nb">complete 
+</span>a4ad33703fa8: Pull <span class="nb">complete 
+</span>f7a5433ce20d: Pull <span class="nb">complete 
+</span>3dcd2a278b4a: Pull <span class="nb">complete 
+</span>Digest: sha256:32f9d9a069f7a735e28fd44ea944d53c61f990ba71460c5c183e610854ca4854
+Status: Downloaded newer image <span class="k">for </span>mysql:5.7
+docker.io/library/mysql:5.7
+
+</code></pre></div></div>
+
+<p><img src="https://i.opsta.cn/docker/docker-images-mysql.png" alt="docker-images-mysql" /></p>
+
+<h3 id="docker-rmi-删除镜像">docker rmi 删除镜像</h3>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost /]# docker rmi <span class="nt">-f</span> 9cfcce23593a <span class="c">#可以写容器id和容器name</span>
+<span class="o">[</span>root@localhost /]# docker rmi <span class="nt">-f</span> 容器id 容器id 容器id <span class="c">#删除多个容器</span>
+<span class="o">[</span>root@localhost /]# docker rmi <span class="nt">-f</span> <span class="si">$(</span>docker images <span class="nt">-aq</span><span class="si">)</span> <span class="c">#删除全部的容器</span>
+
+</code></pre></div></div>
+
+<h2 id="容器命令">容器命令</h2>
+
+<h3 id="新建容器并启动">新建容器并启动</h3>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost /]# docker pull centos
+
+docker run <span class="o">[</span>可选参数] image
+<span class="c"># 参数说明</span>
+<span class="nt">--name</span><span class="o">=</span><span class="s2">"Name"</span> 容器名字 tomcat1 tomcat2,用来区分容器
+<span class="nt">-d</span> 			  后台方式运行
+<span class="nt">-it</span> 		  使用交互方式运行 进入容器查看内容
+<span class="nt">-p</span>
+	<span class="nt">-p</span> ip:主机端口:容器端口
+	<span class="nt">-p</span> 主机端口:容器端口 <span class="o">(</span>常用<span class="o">)</span>
+    <span class="nt">-p</span> 容器端口
+    容器端口
+<span class="nt">-p</span>  随机指定端口
+
+<span class="c">#测试</span>
+<span class="o">[</span>root@localhost /]# docker run <span class="nt">-it</span> centos /bin/bash
+<span class="o">[</span>root@9a2366039d94 /]# <span class="nb">ls</span> <span class="c">#查看容器内的centos</span>
+bin  dev  etc  home  lib  lib64  lost+found  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var
+
+<span class="o">[</span>root@9a2366039d94 /]# <span class="nb">exit</span> <span class="c">#从容器退出</span>
+<span class="nb">exit</span>
+<span class="o">[</span>root@localhost /]# Ctrl+p+q <span class="c">#容器不停止退出</span>
+
+</code></pre></div></div>
+
+<h3 id="列出所有的运行的容器">列出所有的运行的容器</h3>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#docker ps </span>
+		<span class="c">#列出当前正在运行的容器</span>
+<span class="nt">-a</span>      <span class="c">#列出当前正在运行的容器+历史运行过的容器</span>
+<span class="nt">-n</span><span class="o">=</span>?    <span class="c">#显示最近创建过的容器</span>
+<span class="nt">-q</span>      <span class="c">#只显示容器的编号</span>
+		
+<span class="o">[</span>root@localhost /]# docker ps
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+<span class="o">[</span>root@localhost /]# docker ps  <span class="nt">-a</span>
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS                          PORTS               NAMES
+9a2366039d94        centos              <span class="s2">"/bin/bash"</span>         5 minutes ago       Exited <span class="o">(</span>0<span class="o">)</span> About a minute ago                       brave_ellis
+3ba0098333eb        bf756fb1ae65        <span class="s2">"/hello"</span>            2 hours ago         Exited <span class="o">(</span>0<span class="o">)</span> 2 hours ago                              boring_villani
+</code></pre></div></div>
+
+<h3 id="删除容器">删除容器</h3>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker <span class="nb">rm </span>容器id    <span class="c">#删除指定的容器</span>
+docker <span class="nb">rm</span> <span class="nt">-f</span>  <span class="si">$(</span>docker images <span class="nt">-aq</span><span class="si">)</span> <span class="c">#删除所有容器</span>
+docker ps <span class="nt">-a</span> <span class="nt">-q</span>|xargs docker <span class="nb">rm</span>    <span class="c">#删除所有容器</span>
+</code></pre></div></div>
+
+<h3 id="启动和停止容器">启动和停止容器</h3>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker start 容器id <span class="c">#启动容器</span>
+docker restart容器id <span class="c">#重启容器</span>
+docker stop 容器id <span class="c">#停止容器</span>
+docker <span class="nb">kill </span>容器id <span class="c">#停止容器</span>
+</code></pre></div></div>
+
+<h2 id="常用命令-1">常用命令</h2>
+
+<h3 id="后台启动容器">后台启动容器</h3>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 命令 docker run -d 镜像名!</span>
+<span class="o">[</span>root@localhost ~]# docker run <span class="nt">-d</span> centos
+1f8d666a521722368cda35dbe7f56f3b46216ea32bd59819a03affa445357269
+<span class="o">[</span>root@localhost ~]# docker ps 
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+<span class="o">[</span>root@localhost ~]# 
+<span class="c">#问题 docker ps  发现centos停止了</span>
+<span class="c">#docker容器使用后台运行 容器中必须要有一个前台进程,如果docker发现没有，就会自动停止</span>
+
+</code></pre></div></div>
+
+<h3 id="查看日志">查看日志</h3>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 显示日志</span>
+<span class="nt">-tf</span>  		<span class="c">#显示日志</span>
+<span class="nt">--tail</span>   	<span class="c">#显示日志条数</span>
+<span class="o">[</span>root@localhost ~]# docker logs <span class="nt">-tf</span> <span class="nt">--tail</span> 10 0ef56c3b0827
+</code></pre></div></div>
+
+<h3 id="查看容器中进程信息">查看容器中进程信息</h3>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># docker top 容器id</span>
+<span class="o">[</span>root@localhost ~]# docker top 718891259ec5 
+UID                 PID                 PPID                C                   STIME               TTY                 TIME                CMD
+root                44346               44327               0                   20:37               pts/0               00:00:00            /bin/bash
+
+</code></pre></div></div>
+
+<h3 id="查看镜像的元数据">查看镜像的元数据</h3>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># docker inspect  容器id</span>
+<span class="o">[</span>root@localhost ~]# docker inspect 718891259ec5 
+<span class="o">[</span>
+    <span class="o">{</span>
+        <span class="s2">"Id"</span>: <span class="s2">"718891259ec5623c1a0969e160433fef56f54b53a78eab71954dd37ff4a682bb"</span>,
+        <span class="s2">"Created"</span>: <span class="s2">"2020-06-19T12:37:59.121676336Z"</span>,
+        <span class="s2">"Path"</span>: <span class="s2">"/bin/bash"</span>,
+        <span class="s2">"Args"</span>: <span class="o">[]</span>,
+        <span class="s2">"State"</span>: <span class="o">{</span>
+            <span class="s2">"Status"</span>: <span class="s2">"running"</span>,
+            <span class="s2">"Running"</span>: <span class="nb">true</span>,
+            <span class="s2">"Paused"</span>: <span class="nb">false</span>,
+            <span class="s2">"Restarting"</span>: <span class="nb">false</span>,
+            <span class="s2">"OOMKilled"</span>: <span class="nb">false</span>,
+            <span class="s2">"Dead"</span>: <span class="nb">false</span>,
+            <span class="s2">"Pid"</span>: 44346,
+            <span class="s2">"ExitCode"</span>: 0,
+            <span class="s2">"Error"</span>: <span class="s2">""</span>,
+            <span class="s2">"StartedAt"</span>: <span class="s2">"2020-06-19T12:38:00.670251197Z"</span>,
+            <span class="s2">"FinishedAt"</span>: <span class="s2">"0001-01-01T00:00:00Z"</span>
+        <span class="o">}</span>,
+        <span class="s2">"Image"</span>: <span class="s2">"sha256:831691599b88ad6cc2a4abbd0e89661a121aff14cfa289ad840fd3946f274f1f"</span>,
+        <span class="s2">"ResolvConfPath"</span>: <span class="s2">"/var/lib/docker/containers/718891259ec5623c1a0969e160433fef56f54b53a78eab71954dd37ff4a682bb/resolv.conf"</span>,
+        <span class="s2">"HostnamePath"</span>: <span class="s2">"/var/lib/docker/containers/718891259ec5623c1a0969e160433fef56f54b53a78eab71954dd37ff4a682bb/hostname"</span>,
+        <span class="s2">"HostsPath"</span>: <span class="s2">"/var/lib/docker/containers/718891259ec5623c1a0969e160433fef56f54b53a78eab71954dd37ff4a682bb/hosts"</span>,
+        <span class="s2">"LogPath"</span>: <span class="s2">"/var/lib/docker/containers/718891259ec5623c1a0969e160433fef56f54b53a78eab71954dd37ff4a682bb/718891259ec5623c1a0969e160433fef56f54b53a78eab71954dd37ff4a682bb-json.log"</span>,
+        <span class="s2">"Name"</span>: <span class="s2">"/ecstatic_shaw"</span>,
+        <span class="s2">"RestartCount"</span>: 0,
+        <span class="s2">"Driver"</span>: <span class="s2">"overlay2"</span>,
+        <span class="s2">"Platform"</span>: <span class="s2">"linux"</span>,
+        <span class="s2">"MountLabel"</span>: <span class="s2">""</span>,
+        <span class="s2">"ProcessLabel"</span>: <span class="s2">""</span>,
+        <span class="s2">"AppArmorProfile"</span>: <span class="s2">""</span>,
+        <span class="s2">"ExecIDs"</span>: null,
+        <span class="s2">"HostConfig"</span>: <span class="o">{</span>
+            <span class="s2">"Binds"</span>: null,
+            <span class="s2">"ContainerIDFile"</span>: <span class="s2">""</span>,
+            <span class="s2">"LogConfig"</span>: <span class="o">{</span>
+                <span class="s2">"Type"</span>: <span class="s2">"json-file"</span>,
+                <span class="s2">"Config"</span>: <span class="o">{}</span>
+            <span class="o">}</span>,
+            <span class="s2">"NetworkMode"</span>: <span class="s2">"default"</span>,
+            <span class="s2">"PortBindings"</span>: <span class="o">{}</span>,
+            <span class="s2">"RestartPolicy"</span>: <span class="o">{</span>
+                <span class="s2">"Name"</span>: <span class="s2">"no"</span>,
+                <span class="s2">"MaximumRetryCount"</span>: 0
+            <span class="o">}</span>,
+            <span class="s2">"AutoRemove"</span>: <span class="nb">false</span>,
+            <span class="s2">"VolumeDriver"</span>: <span class="s2">""</span>,
+            <span class="s2">"VolumesFrom"</span>: null,
+            <span class="s2">"CapAdd"</span>: null,
+            <span class="s2">"CapDrop"</span>: null,
+            <span class="s2">"Capabilities"</span>: null,
+            <span class="s2">"Dns"</span>: <span class="o">[]</span>,
+            <span class="s2">"DnsOptions"</span>: <span class="o">[]</span>,
+            <span class="s2">"DnsSearch"</span>: <span class="o">[]</span>,
+            <span class="s2">"ExtraHosts"</span>: null,
+            <span class="s2">"GroupAdd"</span>: null,
+            <span class="s2">"IpcMode"</span>: <span class="s2">"private"</span>,
+            <span class="s2">"Cgroup"</span>: <span class="s2">""</span>,
+            <span class="s2">"Links"</span>: null,
+            <span class="s2">"OomScoreAdj"</span>: 0,
+            <span class="s2">"PidMode"</span>: <span class="s2">""</span>,
+            <span class="s2">"Privileged"</span>: <span class="nb">false</span>,
+            <span class="s2">"PublishAllPorts"</span>: <span class="nb">false</span>,
+            <span class="s2">"ReadonlyRootfs"</span>: <span class="nb">false</span>,
+            <span class="s2">"SecurityOpt"</span>: null,
+            <span class="s2">"UTSMode"</span>: <span class="s2">""</span>,
+            <span class="s2">"UsernsMode"</span>: <span class="s2">""</span>,
+            <span class="s2">"ShmSize"</span>: 67108864,
+            <span class="s2">"Runtime"</span>: <span class="s2">"runc"</span>,
+            <span class="s2">"ConsoleSize"</span>: <span class="o">[</span>
+                0,
+                0
+            <span class="o">]</span>,
+            <span class="s2">"Isolation"</span>: <span class="s2">""</span>,
+            <span class="s2">"CpuShares"</span>: 0,
+            <span class="s2">"Memory"</span>: 0,
+            <span class="s2">"NanoCpus"</span>: 0,
+            <span class="s2">"CgroupParent"</span>: <span class="s2">""</span>,
+            <span class="s2">"BlkioWeight"</span>: 0,
+            <span class="s2">"BlkioWeightDevice"</span>: <span class="o">[]</span>,
+            <span class="s2">"BlkioDeviceReadBps"</span>: null,
+            <span class="s2">"BlkioDeviceWriteBps"</span>: null,
+            <span class="s2">"BlkioDeviceReadIOps"</span>: null,
+            <span class="s2">"BlkioDeviceWriteIOps"</span>: null,
+            <span class="s2">"CpuPeriod"</span>: 0,
+            <span class="s2">"CpuQuota"</span>: 0,
+            <span class="s2">"CpuRealtimePeriod"</span>: 0,
+            <span class="s2">"CpuRealtimeRuntime"</span>: 0,
+            <span class="s2">"CpusetCpus"</span>: <span class="s2">""</span>,
+            <span class="s2">"CpusetMems"</span>: <span class="s2">""</span>,
+            <span class="s2">"Devices"</span>: <span class="o">[]</span>,
+            <span class="s2">"DeviceCgroupRules"</span>: null,
+            <span class="s2">"DeviceRequests"</span>: null,
+            <span class="s2">"KernelMemory"</span>: 0,
+            <span class="s2">"KernelMemoryTCP"</span>: 0,
+            <span class="s2">"MemoryReservation"</span>: 0,
+            <span class="s2">"MemorySwap"</span>: 0,
+            <span class="s2">"MemorySwappiness"</span>: null,
+            <span class="s2">"OomKillDisable"</span>: <span class="nb">false</span>,
+            <span class="s2">"PidsLimit"</span>: null,
+            <span class="s2">"Ulimits"</span>: null,
+            <span class="s2">"CpuCount"</span>: 0,
+            <span class="s2">"CpuPercent"</span>: 0,
+            <span class="s2">"IOMaximumIOps"</span>: 0,
+            <span class="s2">"IOMaximumBandwidth"</span>: 0,
+            <span class="s2">"MaskedPaths"</span>: <span class="o">[</span>
+                <span class="s2">"/proc/asound"</span>,
+                <span class="s2">"/proc/acpi"</span>,
+                <span class="s2">"/proc/kcore"</span>,
+                <span class="s2">"/proc/keys"</span>,
+                <span class="s2">"/proc/latency_stats"</span>,
+                <span class="s2">"/proc/timer_list"</span>,
+                <span class="s2">"/proc/timer_stats"</span>,
+                <span class="s2">"/proc/sched_debug"</span>,
+                <span class="s2">"/proc/scsi"</span>,
+                <span class="s2">"/sys/firmware"</span>
+            <span class="o">]</span>,
+            <span class="s2">"ReadonlyPaths"</span>: <span class="o">[</span>
+                <span class="s2">"/proc/bus"</span>,
+                <span class="s2">"/proc/fs"</span>,
+                <span class="s2">"/proc/irq"</span>,
+                <span class="s2">"/proc/sys"</span>,
+                <span class="s2">"/proc/sysrq-trigger"</span>
+            <span class="o">]</span>
+        <span class="o">}</span>,
+        <span class="s2">"GraphDriver"</span>: <span class="o">{</span>
+            <span class="s2">"Data"</span>: <span class="o">{</span>
+                <span class="s2">"LowerDir"</span>: <span class="s2">"/var/lib/docker/overlay2/023249bbfd4df4b3f0dcbc9be7ca09d187f71ed0bc5059ce525e58aca1adf1ae-init/diff:/var/lib/docker/overlay2/08a0e1d413960f76d1f62861f7ec8641eec1789495f2199397ad63f853d775b9/diff"</span>,
+                <span class="s2">"MergedDir"</span>: <span class="s2">"/var/lib/docker/overlay2/023249bbfd4df4b3f0dcbc9be7ca09d187f71ed0bc5059ce525e58aca1adf1ae/merged"</span>,
+                <span class="s2">"UpperDir"</span>: <span class="s2">"/var/lib/docker/overlay2/023249bbfd4df4b3f0dcbc9be7ca09d187f71ed0bc5059ce525e58aca1adf1ae/diff"</span>,
+                <span class="s2">"WorkDir"</span>: <span class="s2">"/var/lib/docker/overlay2/023249bbfd4df4b3f0dcbc9be7ca09d187f71ed0bc5059ce525e58aca1adf1ae/work"</span>
+            <span class="o">}</span>,
+            <span class="s2">"Name"</span>: <span class="s2">"overlay2"</span>
+        <span class="o">}</span>,
+        <span class="s2">"Mounts"</span>: <span class="o">[]</span>,
+        <span class="s2">"Config"</span>: <span class="o">{</span>
+            <span class="s2">"Hostname"</span>: <span class="s2">"718891259ec5"</span>,
+            <span class="s2">"Domainname"</span>: <span class="s2">""</span>,
+            <span class="s2">"User"</span>: <span class="s2">""</span>,
+            <span class="s2">"AttachStdin"</span>: <span class="nb">true</span>,
+            <span class="s2">"AttachStdout"</span>: <span class="nb">true</span>,
+            <span class="s2">"AttachStderr"</span>: <span class="nb">true</span>,
+            <span class="s2">"Tty"</span>: <span class="nb">true</span>,
+            <span class="s2">"OpenStdin"</span>: <span class="nb">true</span>,
+            <span class="s2">"StdinOnce"</span>: <span class="nb">true</span>,
+            <span class="s2">"Env"</span>: <span class="o">[</span>
+                <span class="s2">"PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"</span>
+            <span class="o">]</span>,
+            <span class="s2">"Cmd"</span>: <span class="o">[</span>
+                <span class="s2">"/bin/bash"</span>
+            <span class="o">]</span>,
+            <span class="s2">"Image"</span>: <span class="s2">"centos"</span>,
+            <span class="s2">"Volumes"</span>: null,
+            <span class="s2">"WorkingDir"</span>: <span class="s2">""</span>,
+            <span class="s2">"Entrypoint"</span>: null,
+            <span class="s2">"OnBuild"</span>: null,
+            <span class="s2">"Labels"</span>: <span class="o">{</span>
+                <span class="s2">"org.label-schema.build-date"</span>: <span class="s2">"20200611"</span>,
+                <span class="s2">"org.label-schema.license"</span>: <span class="s2">"GPLv2"</span>,
+                <span class="s2">"org.label-schema.name"</span>: <span class="s2">"CentOS Base Image"</span>,
+                <span class="s2">"org.label-schema.schema-version"</span>: <span class="s2">"1.0"</span>,
+                <span class="s2">"org.label-schema.vendor"</span>: <span class="s2">"CentOS"</span>
+            <span class="o">}</span>
+        <span class="o">}</span>,
+        <span class="s2">"NetworkSettings"</span>: <span class="o">{</span>
+            <span class="s2">"Bridge"</span>: <span class="s2">""</span>,
+            <span class="s2">"SandboxID"</span>: <span class="s2">"e95fd62687e905550f2052f80362370f565d1e201cc2d37c45ba4dcc4f9975aa"</span>,
+            <span class="s2">"HairpinMode"</span>: <span class="nb">false</span>,
+            <span class="s2">"LinkLocalIPv6Address"</span>: <span class="s2">""</span>,
+            <span class="s2">"LinkLocalIPv6PrefixLen"</span>: 0,
+            <span class="s2">"Ports"</span>: <span class="o">{}</span>,
+            <span class="s2">"SandboxKey"</span>: <span class="s2">"/var/run/docker/netns/e95fd62687e9"</span>,
+            <span class="s2">"SecondaryIPAddresses"</span>: null,
+            <span class="s2">"SecondaryIPv6Addresses"</span>: null,
+            <span class="s2">"EndpointID"</span>: <span class="s2">"d3b1128ead012a85991473f2353d2b37e4f68a34f6eab5e05e240b1da1f5c2c4"</span>,
+            <span class="s2">"Gateway"</span>: <span class="s2">"172.17.0.1"</span>,
+            <span class="s2">"GlobalIPv6Address"</span>: <span class="s2">""</span>,
+            <span class="s2">"GlobalIPv6PrefixLen"</span>: 0,
+            <span class="s2">"IPAddress"</span>: <span class="s2">"172.17.0.3"</span>,
+            <span class="s2">"IPPrefixLen"</span>: 16,
+            <span class="s2">"IPv6Gateway"</span>: <span class="s2">""</span>,
+            <span class="s2">"MacAddress"</span>: <span class="s2">"02:42:ac:11:00:03"</span>,
+            <span class="s2">"Networks"</span>: <span class="o">{</span>
+                <span class="s2">"bridge"</span>: <span class="o">{</span>
+                    <span class="s2">"IPAMConfig"</span>: null,
+                    <span class="s2">"Links"</span>: null,
+                    <span class="s2">"Aliases"</span>: null,
+                    <span class="s2">"NetworkID"</span>: <span class="s2">"5bc82b228aae9d7965bd8db477b3d0e89a96195c68746ce1577852e3c7d6891c"</span>,
+                    <span class="s2">"EndpointID"</span>: <span class="s2">"d3b1128ead012a85991473f2353d2b37e4f68a34f6eab5e05e240b1da1f5c2c4"</span>,
+                    <span class="s2">"Gateway"</span>: <span class="s2">"172.17.0.1"</span>,
+                    <span class="s2">"IPAddress"</span>: <span class="s2">"172.17.0.3"</span>,
+                    <span class="s2">"IPPrefixLen"</span>: 16,
+                    <span class="s2">"IPv6Gateway"</span>: <span class="s2">""</span>,
+                    <span class="s2">"GlobalIPv6Address"</span>: <span class="s2">""</span>,
+                    <span class="s2">"GlobalIPv6PrefixLen"</span>: 0,
+                    <span class="s2">"MacAddress"</span>: <span class="s2">"02:42:ac:11:00:03"</span>,
+                    <span class="s2">"DriverOpts"</span>: null
+                <span class="o">}</span>
+            <span class="o">}</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+<span class="o">]</span>
+
+</code></pre></div></div>
+
+<h3 id="进入当前正在运行的容器">进入当前正在运行的容器</h3>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker <span class="nb">exec</span> <span class="nt">-it</span> 容器id 
+
+
+<span class="o">[</span>root@localhost ~]# docker <span class="nb">exec</span> <span class="nt">-it</span> e4026153e96b /bin/bash
+<span class="o">[</span>root@e4026153e96b /]# ps <span class="nt">-aux</span>
+USER        PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root          1  0.0  0.1  12008  2104 pts/0    Ss+  12:36   0:00 /bin/bash
+root         14  0.0  0.1  12008  1948 pts/1    Ss+  13:41   0:00 /bin/sh
+root         20  0.0  0.0  12008  1684 pts/2    Ss+  13:42   0:00 /bin/sh
+root         25  0.3  0.1  12008  2108 pts/3    Ss   13:42   0:00 /bin/bash
+root         38  0.0  0.1  47496  2060 pts/3    R+   13:42   0:00 ps <span class="nt">-aux</span>
+<span class="c"># 方式二</span>
+docker attach 容器id 
+docker attach  e4026153e96b
+<span class="c"># docker exec # 进入容器后开启一个新的终端在里面操作</span>
+<span class="c"># docker attach  # 进入容器正在执行的终端 不会启动新的进程</span>
+</code></pre></div></div>
+
+<h3 id="从容器内拷贝东西到宿主机">从容器内拷贝东西到宿主机</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[root@localhost ~]# docker attach e4026153e96b
+[root@e4026153e96b /]# echo 123 &gt;a.txt
+[root@e4026153e96b /]# echo 123 a.txtread escape sequence
+[root@localhost ~]# ls
+anaconda-ks.cfg  initial-setup-ks.cfg
+[root@localhost ~]# docker cp e4026153e96b:/a.txt ./
+[root@localhost ~]# ls
+anaconda-ks.cfg  a.txt  initial-setup-ks.cfg
+[root@localhost ~]# more a.txt 
+123
+</code></pre></div></div>
+
+<h2 id="参考资料">参考资料</h2>
+
+<p><a href="https://juejin.im/post/5b260ec26fb9a00e8e4b031a#heading-21">掘金</a> <a href="https://docs.docker.com/">官网</a> <a href="https://www.bilibili.com/video/BV1og4y1q7M4?">狂神说Docker</a></p>
+:ET

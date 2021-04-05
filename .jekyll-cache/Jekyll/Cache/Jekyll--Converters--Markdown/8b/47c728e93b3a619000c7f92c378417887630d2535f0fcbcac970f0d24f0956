@@ -1,0 +1,16 @@
+I"p<h2 id="redis">redis</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>flushdb //删除当前数据库中的所有Key
+
+flushall //删除所有数据库中的key
+
+keys * //获取所有key
+
+keys admin* //列出开头的
+
+dbsize  //查看key数量
+
+monitor //查看redis正在做什么
+</code></pre></div></div>
+
+:ET

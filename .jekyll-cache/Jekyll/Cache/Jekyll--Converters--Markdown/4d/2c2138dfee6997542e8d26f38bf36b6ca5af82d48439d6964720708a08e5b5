@@ -1,0 +1,161 @@
+I"�<p>上两天在研究如何编译安装mariadb+gelera就是为了把它打成rpm包，其实打成rpm包很简单解压一下就行了,把mariadb做成服务,主要是为了方便安装，实现一条命令安装完成mariadb+gelera集群</p>
+
+<h2 id="打包前准备">打包前准备</h2>
+
+<p>把so放到mariadb目录下，修改my.cnf配置的路径</p>
+
+<p><img src="https://i.opsta.cn/img/rpmbuild-mariadb-my.cnf.png" alt="" /></p>
+
+<p>编写master启动脚本</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[root@demo2 mariadb]# more mysqlCluster-start.sh 
+sed -i 's/0/1/g' /opt/**隐藏路径**/mariadb/data/grastate.dat
+pkill mysqld
+netstat -nlp | grep :4567 | awk '{print $7}' | awk -F"/" '{ print $1 }' #根据端口关闭进程
+/opt/**隐藏路径**/mariadb/bin/mysqld --wsrep-new-cluster --user=mysql
+</code></pre></div></div>
+
+<h2 id="安装rpmbuild">安装rpmbuild</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>yum install rpm-build
+yum install rpmdevtools 
+rpmdev-setuptree #生成rpmbuild目录 
+
+[root@demo rpmbuild]# ls
+BUILD  RPMS  SOURCES  SPECS  SRPMS
+[root@demo rpmbuild]# pwd
+/root/rpmbuild
+</code></pre></div></div>
+
+<h2 id="文件解析">文件解析</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[root@demo rpmbuild]# tree *
+BUILD
+RPMS
+SOURCES
+├── mariadb-cluster.tar.gz #打包的mariadb安装路径的文件夹
+└── mariadb.service #编写的mariadb服务名
+SPECS
+└── mariadb.spec
+SRPMS
+0 directories, 3 files
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[root@demo SOURCES]# more mariadb.service 
+[Unit]
+Description=mysqld Server
+
+[Service]
+Type=forking
+ExecStart=/opt/**隐藏路径**/mariadb/mysqld start
+ExecStop=/opt/**隐藏路径**/mariadb/mysqld stop
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[root@demo SPECS]# more mariadb.spec 
+Name: Mariadb-Cluster
+Version:1
+Release: 1
+Summary: Mariadb-Cluster1.0
+Group: Applications/Engineering
+License: GPL
+AutoReqProv:no
+Source0:mariadb-cluster.tar.gz
+Source1:mariadb.service
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
+%description
+This package is mariadb Setup Program.
+Prefix: /opt/**隐藏路径**
+%define initd /usr/lib/systemd/system
+%define ppath /opt/**隐藏路径**
+%prep
+%setup  -b 0 -c -n mariadb
+
+
+#%build
+
+%install
+install -d $RPM_BUILD_ROOT%{initd}
+install -d $RPM_BUILD_ROOT%{ppath}
+cp -a $RPM_BUILD_DIR/*  $RPM_BUILD_ROOT%{ppath}
+%{__install} -p -D -m 0755 %{SOURCE1} $RPM_BUILD_ROOT%{initd}/mariadb.service
+
+%pre
+userdel -r mysql
+groupadd mysql
+useradd -g mysql mysql
+%post
+systemctl  enable mariadb.service
+%preun
+systemctl  stop   mariadb.service
+systemctl disable mariadb.service
+rm -rf /opt/**隐藏路径**/mariadb
+%files
+%defattr(-,root,root)
+%attr(755,mysql,mysql) /opt/**隐藏路径**/mariadb/*
+%{initd}
+
+%clean
+rm -rf /opt/**隐藏路径**/mariadb
+
+%changelog
+</code></pre></div></div>
+
+<h3 id="编译rpm包">编译rpm包</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rpmbuild  -bb mariadb.spec 
+
+[root@demo rpmbuild]# tree 
+.
+├── BUILD
+├── BUILDROOT
+├── RPMS
+│   └── x86_64
+│       └── Mariadb-Cluster-1-1.x86_64.rpm
+├── SOURCES
+│   ├── mariadb-cluster.tar.gz
+│   └── mariadb.service
+├── SPECS
+│   ├── err.log
+│   └── mariadb.spec
+└── SRPMS
+
+7 directories, 5 files
+
+
+</code></pre></div></div>
+
+<h3 id="安装运行">安装运行</h3>
+
+<p>需要修改my.cnf配置文件</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[galera]
+wsrep_on=ON
+wsrep_provider=/opt/eetrust/mariadb/libgalera_smm.so#galera的库文件的地址
+wsrep_cluster_address="gcomm://192.168.0.190,192.168.0.189"#各节点的ip
+wsrep_node_name=demo#节点主机名
+wsrep_cluster_name=galera_cluster
+wsrep_node_address=192.168.0.189#节点ip
+binlog_format=row#二进制日志设置为行模式  row （安全性最高，性能最低）
+default_storage_engine=InnoDB#使用的默认引擎 innoDB  支持事务
+innodb_autoinc_lock_mode=2#2为性能最好
+</code></pre></div></div>
+
+<p>修改内容为正确的主机名,IP即可</p>
+
+<p>如果将它作为<strong>master</strong>启动</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[root@demo mariadb]# ./mysqlCluster-start.sh 
+Shutting down MySQL.... SUCCESS! 
+Bootstrapping the cluster.. Starting MySQL.. SUCCESS! 
+</code></pre></div></div>
+
+<p>从节点启动</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>systemctl start mariadb
+</code></pre></div></div>
+
+:ET

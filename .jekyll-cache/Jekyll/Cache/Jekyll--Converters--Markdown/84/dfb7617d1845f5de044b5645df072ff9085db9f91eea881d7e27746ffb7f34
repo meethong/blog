@@ -1,0 +1,37 @@
+I"y<p>以前对着别人的教程也安装过Nginx,其实都一样无非看自己需要什么依赖，安装在哪，之前的网站也用它做负载，配置证书，一系列的操作，大半年没用忘记了，今天又用到就记录下。</p>
+
+<h2 id="nginx安装">Nginx安装</h2>
+
+<p>用到的两个安装包</p>
+
+<p><a href="http://nginx.org/download/nginx-1.17.9.tar.gz">http://nginx.org/download/nginx-1.17.9.tar.gz</a></p>
+
+<p><a href="https://bitbucket.org/nginx-goodies/nginx-sticky-module-ng/get/master.tar.gz">https://bitbucket.org/nginx-goodies/nginx-sticky-module-ng/get/master.tar.gz</a></p>
+
+<p>下载之后 解压</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vim nginx-goodies-nginx-sticky-module-ng-08a395c66e42 ngx_http_sticky_misc.c
+新增两行
+#include &lt;openssl/sha.h&gt;
+#include &lt;openssl/md5.h&gt;
+</code></pre></div></div>
+
+<h3 id="编译命令">编译命令</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>./configure --prefix=/opt/meethong/nginx --add-module=/nginx-goodies-nginx-sticky-module-ng-08a395c66e42/
+make
+make install
+</code></pre></div></div>
+
+<h3 id="启停服务">启停服务</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/opt/meethong/nginx/sbin/nginx 
+/opt/meethong/nginx/sbin/nginx -s stop
+</code></pre></div></div>
+
+<h3 id="配置服务">配置服务</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>/opt/meethong/nginx/conf 配置
+</code></pre></div></div>
+
+:ET

@@ -1,0 +1,75 @@
+I"<p>了解 Docker 网络概念</p>
+
+<h1 id="docker网络">docker网络</h1>
+
+<p>测试 tomcat</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker run <span class="nt">-d</span> <span class="nt">-P</span> <span class="nt">--name</span> tomcat01 tomcat
+
+<span class="o">[</span>root@localhost /]# docker <span class="nb">exec</span> <span class="nt">-it</span> tomcat01 ip addr
+1: lo: &lt;LOOPBACK,UP,LOWER_UP&gt; mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1
+    <span class="nb">link</span>/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+60: eth0@if61: &lt;BROADCAST,MULTICAST,UP,LOWER_UP&gt; mtu 1500 qdisc noqueue state UP group default 
+    <span class="nb">link</span>/ether 02:42:ac:11:00:02 brd ff:ff:ff:ff:ff:ff link-netnsid 0
+    inet 172.17.0.2/16 brd 172.17.255.255 scope global eth0
+       valid_lft forever preferred_lft forever
+failed to resize <span class="nb">tty</span>, using default size
+</code></pre></div></div>
+
+<ol>
+  <li>Docker 容器之间的连接使用的桥接 用的是 veth-pair技术</li>
+  <li>容器不指定网络 默认都是 Docker 路由 默认分配一个地址</li>
+</ol>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost /]# docker <span class="nb">exec</span> <span class="nt">-it</span> tomcat02 ping tomcat01
+ping: tomcat01: Name or service not known
+<span class="c">#可以使用 --link实现网络通畅 但不推荐 原理就是在hosts文件里写了配置</span>
+<span class="o">[</span>root@localhost /]# docker run <span class="nt">-d</span> <span class="nt">-P</span> <span class="nt">--name</span> tomcat03 <span class="nt">--link</span> tomcat02 tomcat
+</code></pre></div></div>
+
+<h2 id="自定义网络">自定义网络</h2>
+
+<blockquote>
+  <p>查看所有的 docker 网络</p>
+</blockquote>
+
+<p><img src="https://i.opsta.cn/docker/docker_2020-06-25_23-00-38.png" alt="docker_2020-06-25_23-00-38" /></p>
+
+<p><strong>网络模式</strong></p>
+
+<ul>
+  <li>bridge：桥接 docker(默认)</li>
+  <li>none：不配置网络</li>
+  <li>host:  和宿主机共享网络</li>
+  <li>container : 容器网络连通！(用的少 局限性很大)</li>
+</ul>
+
+<p><strong>测试</strong></p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#docker 创建容器默认用的bridge 即docker0网卡</span>
+<span class="o">[</span>root@localhost docker]# docker run <span class="nt">-d</span> <span class="nt">-P</span> <span class="nt">--name</span> tomcat01 <span class="nt">--net</span> bridge tomcat
+
+</code></pre></div></div>
+
+<h2 id="自定义网络-1">自定义网络</h2>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker network create <span class="nt">--driver</span> bridge <span class="nt">--subnet</span> 192.168.0.0/16 <span class="nt">--gateway</span> 192.168.0.1 mynet
+</code></pre></div></div>
+
+<p><img src="https://i.opsta.cn/docker/docker_2020-06-25_23-15-56.png" alt="docker_2020-06-25_23-15-56" /></p>
+
+<p>配置完网络就可以直接ping通了</p>
+
+<p><img src="https://i.opsta.cn/docker/docker_2020-06-25_23-17-54.png" alt="docker_2020-06-25_23-17-54" /></p>
+
+<h2 id="网络连通">网络连通</h2>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#测试把tomcat01 加入mynet网络里</span>
+<span class="o">[</span>root@localhost]#  docker network connect mynet tomcat01
+<span class="c">#即一个容器两个ip 地址</span>
+</code></pre></div></div>
+
+<p><img src="https://i.opsta.cn/docker/docker_2020-06-25_23-30-29.png" alt="docker_2020-06-25_23-30-29" /></p>
+:ET

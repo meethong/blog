@@ -1,0 +1,235 @@
+I",<p>Dockerfile 就是用来构建 docker 镜像的构建文件！命令脚本！ 通过这个脚本可以生产镜像</p>
+
+<h2 id="初始dockerfile">初始Dockerfile</h2>
+
+<p>Dockerfile 构建步骤：</p>
+
+<p>1、编写一个dockerfile 文件</p>
+
+<p>2、docker build 构建成为一个镜像</p>
+
+<p>3、docker run 运行镜像</p>
+
+<p>4、docker push 发布镜像</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#创建一个dockerfile</span>
+<span class="c">#文件内容如下</span>
+<span class="o">[</span>root@localhost docker-file]# <span class="nb">cat </span>dockerfile1 
+FROM centos
+
+VOLUME <span class="o">[</span><span class="s2">"volume01"</span>,<span class="s2">"volume02"</span><span class="o">]</span> <span class="c">#匿名挂载</span>
+
+CMD <span class="nb">echo</span> <span class="s2">"--------&gt;end&lt;------"</span>
+
+CMD /bin/bash
+</code></pre></div></div>
+
+<p><img src="https://i.opsta.cn/docker/docker-dockerfile-centos-ops.png" alt="docker-dockerfile-centos-ops" /></p>
+
+<h2 id="dockerfile构建过程">DockerFile构建过程</h2>
+
+<p><strong>基础知识</strong>：</p>
+
+<p>1、每个保留关键字 (指令) 都是必须是大写字母</p>
+
+<p>2、命令从上到下执行顺序</p>
+
+<p>3、# 表示注释</p>
+
+<p>4、每一个指令都会创建提交一个新的镜像层，并提交</p>
+
+<p>5、常见指令</p>
+
+<p><img src="https://i.opsta.cn/docker/docker-dockerfile.png" alt="docker-dockerfile" /></p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>FROM		<span class="c">#基础镜像，一切从这里开始</span>
+MAINTAINER	<span class="c">#镜像是谁写的，姓名+邮箱（统一格式）</span>
+RUN			<span class="c">#镜像构建的时候需要运行的命令</span>
+ADD			<span class="c">#步骤，例如要搭建tomcat镜像，要加入tomcat压缩包</span>
+WORKDIR		<span class="c">#镜像的工作目录</span>
+VOLUME		<span class="c">#挂载的目录位置</span>
+EXPOST		<span class="c">#暴露端口配置</span>
+CMD			<span class="c">#指定这个容器启动的时候要运行的命令，只有最后一个会生效，即可被代替</span>
+ENTRYPOINT	<span class="c">#指定这个容器启动的时候要运行的命令，可以直接追加命令</span>
+ONBUILD		<span class="c">#当构建一个被继承当镜像，DockerFile这个时候就会执行ONBUILD的指令（触发指令）</span>
+COPY		<span class="c">#类似ADD，将文件拷贝到镜像中</span>
+ENV 		<span class="c">#构建的时候设置环境变量</span>
+</code></pre></div></div>
+
+<h2 id="名词解释">名词解释</h2>
+
+<p>DockerFile：构建文件，定义了一切的步骤 源代码</p>
+
+<p>DockerImages：通过 DockerFile 构建生成的镜像</p>
+
+<p>Docker容器：容器就是镜像运行起来提供服务器</p>
+
+<h2 id="实战测试">实战测试</h2>
+
+<p>编写一个简单的centos容器 带 vim 跟 net-tools 的</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#1 编写dockerfile的文件</span>
+<span class="o">[</span>root@localhost docker-file]# <span class="nb">cat </span>dockerfile-centos 
+<span class="c">#以哪个镜像为基础</span>
+FROM centos
+MAINTAINER ops&lt;me@opsta.cn&gt; <span class="c">#谁维护的</span>
+
+<span class="c">#设置变量</span>
+ENV MYPATH /usr/local
+WORKDIR <span class="nv">$MYPATH</span> <span class="c">#用户进入容器的目录</span>
+
+<span class="c">#执行安装</span>
+RUN yum <span class="nt">-y</span> <span class="nb">install </span>vim
+RUN yum <span class="nt">-y</span> <span class="nb">install </span>net-tools
+
+<span class="c">#暴露端口</span>
+EXPOSE 80
+
+<span class="c">#输出</span>
+CMD <span class="nb">echo</span> <span class="nv">$MYPATH</span>
+CMD <span class="nb">echo</span> <span class="nt">-----</span><span class="o">&gt;</span>opsta&lt;<span class="nt">-------</span>
+CMD /bin/bash
+<span class="c"># 2 通过这个文件构建镜像</span>
+<span class="c">#命令 docker build -f dockerfile-centos mycentos:0.1 .</span>
+Successfully built 5a7c6e767b10
+Successfully tagged mycentos:0.1
+<span class="c"># 3 测试运行</span>
+
+</code></pre></div></div>
+
+<p>列出本地进行的变更历史</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker history 5a7c6e767b10
+</code></pre></div></div>
+
+<blockquote>
+  <p>CMD 和 ENTRYPOINT 的区别</p>
+</blockquote>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>CMD <span class="c">#指定容器启动的时候要运行的命令,只有最后一个会生效 可被替代</span>
+ENTRYPOINT <span class="c">##指定容器启动的时候要运行的命令,可以追加</span>
+</code></pre></div></div>
+
+<p>测试CMD</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#编写 dockerfile文件</span>
+<span class="o">[</span>root@localhost docker-file]# more dockerfile-cmd-test 
+FROM centos
+CMD <span class="o">[</span><span class="s2">"ls"</span>,<span class="s2">"-a"</span><span class="o">]</span>
+
+<span class="c">#构建镜像</span>
+<span class="o">[</span>root@localhost docker-file]# docker build <span class="nt">-f</span> dockerfile-cmd-test <span class="nt">-t</span> cmdtest <span class="nb">.</span>
+
+<span class="c">#run 运行</span>
+<span class="o">[</span>root@localhost docker-file]# docker run <span class="nt">-it</span> cmdtest
+<span class="nb">.</span>   .dockerenv	dev  home  lib64       media  opt   root  sbin	sys  usr
+..  bin		etc  lib   lost+found  mnt    proc  run   srv	tmp  var
+
+<span class="o">[</span>root@localhost docker-file]# docker run <span class="nt">-it</span> cmdtest <span class="nt">-l</span>
+docker: Error response from daemon: OCI runtime create failed: container_linux.go:349: starting container process caused <span class="s2">"exec: </span><span class="se">\"</span><span class="s2">-l</span><span class="se">\"</span><span class="s2">: executable file not found in </span><span class="nv">$PATH</span><span class="s2">"</span>: unknown.
+ERRO[0000] error waiting <span class="k">for </span>container: context canceled 
+
+</code></pre></div></div>
+
+<p>测试ENTRYPOINT</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost docker-file]# more dockerfile-entrtpoint-test 
+FROM centos
+ENTRYPOINT  <span class="o">[</span><span class="s2">"ls"</span>,<span class="s2">"-a"</span><span class="o">]</span>
+<span class="o">[</span>root@localhost docker-file]# docker build <span class="nt">-f</span> dockerfile-entrtpoint-test <span class="nt">-t</span> entrtpoint-test <span class="nb">.</span>
+Successfully built 73527121de0b
+Successfully tagged entrtpoint-test:latest
+<span class="o">[</span>root@localhost docker-file]# docker run <span class="nt">-it</span> entrtpoint-test 
+<span class="nb">.</span>   .dockerenv	dev  home  lib64       media  opt   root  sbin	sys  usr
+..  bin		etc  lib   lost+found  mnt    proc  run   srv	tmp  var
+
+<span class="o">[</span>root@localhost docker-file]# docker run 73527121de0b <span class="nt">-l</span> 
+total 0
+<span class="nt">-rwxr-xr-x</span><span class="nb">.</span>   1 root root   0 Jun 23 08:31 .dockerenv
+lrwxrwxrwx.   1 root root   7 May 11  2019 bin -&gt; usr/bin
+drwxr-xr-x.   5 root root 340 Jun 23 08:31 dev
+drwxr-xr-x.   1 root root  66 Jun 23 08:31 etc
+drwxr-xr-x.   2 root root   6 May 11  2019 home
+lrwxrwxrwx.   1 root root   7 May 11  2019 lib -&gt; usr/lib
+lrwxrwxrwx.   1 root root   9 May 11  2019 lib64 -&gt; usr/lib64
+drwx------.   2 root root   6 Jun 11 02:35 lost+found
+drwxr-xr-x.   2 root root   6 May 11  2019 media
+drwxr-xr-x.   2 root root   6 May 11  2019 mnt
+drwxr-xr-x.   2 root root   6 May 11  2019 opt
+dr-xr-xr-x. 217 root root   0 Jun 23 08:31 proc
+dr-xr-x---.   2 root root 162 Jun 11 02:35 root
+drwxr-xr-x.  11 root root 163 Jun 11 02:35 run
+lrwxrwxrwx.   1 root root   8 May 11  2019 sbin -&gt; usr/sbin
+drwxr-xr-x.   2 root root   6 May 11  2019 srv
+dr-xr-xr-x.  13 root root   0 Jun 21 03:22 sys
+drwxrwxrwt.   7 root root 145 Jun 11 02:35 tmp
+drwxr-xr-x.  12 root root 144 Jun 11 02:35 usr
+drwxr-xr-x.  20 root root 262 Jun 11 02:35 var
+
+</code></pre></div></div>
+
+<h2 id="制作-tomcat-镜像">制作 Tomcat 镜像</h2>
+
+<p>1、准备镜像文件 Tomcat 压缩包，jdk 的压缩包</p>
+
+<p>2、编写Dockerfile ，官方命名 <strong>Dockerfile</strong> ，build会自动寻找这个文件 不需要 -f 指定</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>FROM centos
+MAINTAINER opsta&lt;me@opsta.cn&gt;
+
+ADD jdk-8u231-linux-x64.tar.gz /usr/local/
+ADD apache-tomcat-8.5.55.tar.gz /usr/local/
+
+RUN yum <span class="nt">-y</span> <span class="nb">install </span>vim
+
+ENV MYPATH /usr/local/
+WORKDIR <span class="nv">$MYPATH</span>
+
+ENV JAVA_HOME  /usr/local/jdk-8u231
+ENV <span class="nv">CLASSPATH</span><span class="o">=</span><span class="nv">$JAVA_HOME</span>/bin
+ENV CATALINA_HOME /usr/local/apache-tomcat-8.5.55
+ENV CATALINA_BASH /usr/local/apache-tomcat-8.5.55
+ENV <span class="nv">PATH</span><span class="o">=</span>.:<span class="nv">$JAVA_HOME</span>/bin:<span class="nv">$CATALINA_HOME</span>/lib:<span class="nv">$CATALINA_HOME</span>/bin:<span class="nv">$PATH</span>
+
+EXPOSE 8080
+
+CMD /usr/local/apache-tomcat-8.5.55/bin/startup.sh <span class="o">&amp;&amp;</span> <span class="nb">tail</span> <span class="nt">-f</span>  /usr/local/apache-tomcat-8.5.55/logs/catalina.out
+
+</code></pre></div></div>
+
+<p>3、构建镜像</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker build -t mytomcat .
+</code></pre></div></div>
+
+<p>4、运行</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code> <span class="c"># -v /opt/tomcat/test/ 可要可不要</span>
+docker run <span class="nt">-d</span> <span class="nt">-p</span> 9090:8080 <span class="nt">--name</span> tomcat <span class="nt">-v</span> /opt/tomcat/test/:/usr/local/apache-tomcat-8.5.55/webapps/test <span class="nt">-v</span> /opt/tomcat/logs:/usr/local/apache-tomcat-8.5.55/logs mytomcat
+</code></pre></div></div>
+
+<p>5、测试访问</p>
+
+<p><img src="https://i.opsta.cn/docker/docker-dockerfile-tomcat-quickstart.png" alt="docker-dockerfile-tomcat-quickstart" /></p>
+
+<h2 id="发布镜像">发布镜像</h2>
+
+<p>1、地址 https://hub.docker.com/ 注册自己的账号</p>
+
+<p>2、登陆</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>dokcer login
+</code></pre></div></div>
+
+<p>3、给自己要提交的镜像打标签</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#docker tag 镜像id 新名字</span>
+docker tag a6fb4f06ee09 meethong/tomcat:1.0
+</code></pre></div></div>
+
+<p>4、提交</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker push meethong/tomcat:1.0
+</code></pre></div></div>
+
+:ET

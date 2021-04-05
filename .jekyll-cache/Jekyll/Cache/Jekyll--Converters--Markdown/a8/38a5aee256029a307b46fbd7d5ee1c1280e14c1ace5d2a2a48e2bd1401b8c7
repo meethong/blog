@@ -1,0 +1,78 @@
+I"�<p>Windonws 去安装 Docker是基于 Hyper-V的，所以必须<strong>启用Hyper-V Windows功能</strong> 官网的安装包也会去开启相关功能。</p>
+
+<h1 id="docker">Docker</h1>
+
+<p><a href="https://docs.docker.com/compose/install/">Docker安装文档</a></p>
+
+<p><a href="https://download.docker.com/win/stable/Docker%20Desktop%20Installer.exe">Docker安装包</a></p>
+
+<h2 id="docker-compose安装">docker-compose安装</h2>
+
+<p>要用到PowerShell 最好设置代理 太慢了</p>
+
+<h2 id="powershell设置代理">PowerShell设置代理</h2>
+
+<ul>
+  <li>设置代理</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>netsh winhttp set proxy "127.0.0.1:1080" 
+</code></pre></div></div>
+
+<ul>
+  <li>恢复默认</li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>netsh winhttp reset proxy
+</code></pre></div></div>
+
+<p>注意要在管理员模式运行，不然提示权限不足。</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>Net.ServicePointManager]::SecurityProtocol <span class="o">=</span> <span class="o">[</span>Net.SecurityProtocolType]::Tls12 <span class="c">#支持https</span>
+Invoke-WebRequest <span class="s2">"https://github.com/docker/compose/releases/download/1.26.1/docker-compose-Windows-x86_64.exe"</span> <span class="nt">-UseBasicParsing</span> <span class="nt">-OutFile</span> <span class="nv">$Env</span>:ProgramFiles<span class="se">\D</span>ocker<span class="se">\d</span>ocker-compose.exe  <span class="c">#安装docker-compose</span>
+</code></pre></div></div>
+
+<h2 id="修改docker默认存储路径">修改docker默认存储路径</h2>
+
+<p>windows10的docker使用的是Hyper-V虚拟机，所以镜像存放的目录就是Hyper-V的目录，首先停止docker。</p>
+
+<p>打开Hyper-V管理器，1.开始菜单右键-&gt;控制面板-&gt;管理工具-&gt;Hyper-V 管理器</p>
+
+<p>右键选择Hyper-V设置</p>
+
+<p><img src="https://i.opsta.cn/docker/docker_2020-07-04_20-38-13.png" alt="docker_2020-07-04_20-38-13" /></p>
+
+<p>然后docker跟他设置一样重启就行</p>
+
+<p><img src="https://i.opsta.cn/docker/docker_2020-07-04_20-39-30.png" alt="docker_2020-07-04_20-39-30" /></p>
+
+<h2 id="报错">报错</h2>
+
+<p>Docker.Core.Backend.BackendException:
+Error response from daemon: open \.\pipe\docker_engine_linux: The system cannot find the file specified.</p>
+
+<p>在win10 命令行提示符执行：</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Net stop com.docker.service
+
+Net start com.docker.service
+</code></pre></div></div>
+
+<h2 id="为容器设置代理">为容器设置代理</h2>
+
+<p>让容器访问谷歌 开心的冲浪</p>
+
+<p>修改 <strong>C:\Users\用户名.docker</strong> 下的 <strong>config.json</strong>  可以把下面这段复制进去 然后重启 <strong>docker</strong></p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">{</span>
+  <span class="s2">"proxies"</span>: <span class="o">{</span>
+    <span class="s2">"default"</span>: <span class="o">{</span>
+      <span class="s2">"httpProxy"</span>: <span class="s2">"192.168.24.149:7890"</span>, <span class="c">#代理地址</span>
+      <span class="s2">"httpsProxy"</span>: <span class="s2">"192.168.24.149:7890"</span>,#代理地址
+      <span class="s2">"noProxy"</span>: <span class="s2">"127.0.0.1,localhost,172.17.0.*,192.168.24.*"</span> <span class="c">#不代理请求</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+</code></pre></div></div>
+
+:ET

@@ -1,0 +1,118 @@
+I"!<p>通过Compose，可以使用YML文件来配置应用程序需要的所有服务。然后，使用一个命令，就可以从YML文件配置置中创建并启动所有服务。Compose 是Docker官方的开源项目，需要安装！</p>
+
+<h2 id="docker-compose">Docker Compose</h2>
+
+<h2 id="安装">安装</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo </span>curl <span class="nt">-L</span> <span class="s2">"https://github.com/docker/compose/releases/download/1.26.2/docker-compose-</span><span class="si">$(</span><span class="nb">uname</span> <span class="nt">-s</span><span class="si">)</span><span class="s2">-</span><span class="si">$(</span><span class="nb">uname</span> <span class="nt">-m</span><span class="si">)</span><span class="s2">"</span> <span class="nt">-o</span> /usr/local/bin/docker-compose 
+</code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nb">sudo chmod</span> +x /usr/local/bin/docker-compose <span class="c">#授权运行</span>
+</code></pre></div></div>
+
+<p><a href="https://docs.docker.com/compose/gettingstarted">入门手册</a></p>
+
+<p>1、应用 app.py</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">import</span> <span class="nn">redis</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+<span class="n">cache</span> <span class="o">=</span> <span class="n">redis</span><span class="p">.</span><span class="n">Redis</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="s">'redis'</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">6379</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">get_hit_count</span><span class="p">():</span>
+    <span class="n">retries</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">cache</span><span class="p">.</span><span class="n">incr</span><span class="p">(</span><span class="s">'hits'</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">redis</span><span class="p">.</span><span class="n">exceptions</span><span class="p">.</span><span class="nb">ConnectionError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">retries</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">exc</span>
+            <span class="n">retries</span> <span class="o">-=</span> <span class="mi">1</span>
+            <span class="n">time</span><span class="p">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+
+
+<span class="o">@</span><span class="n">app</span><span class="p">.</span><span class="n">route</span><span class="p">(</span><span class="s">'/'</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">hello</span><span class="p">():</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="n">get_hit_count</span><span class="p">()</span>
+    <span class="k">return</span> <span class="s">'Hello World! I have been seen {} times.</span><span class="se">\n</span><span class="s">'</span><span class="p">.</span><span class="nb">format</span><span class="p">(</span><span class="n">count</span><span class="p">)</span>
+
+</code></pre></div></div>
+
+<p>2、Dockerfile 应用打包为镜像</p>
+
+<div class="language-dockerfile highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">FROM</span><span class="s"> python:3.7-alpine</span>
+<span class="k">WORKDIR</span><span class="s"> /code</span>
+<span class="k">ENV</span><span class="s"> FLASK_APP app.py</span>
+<span class="k">ENV</span><span class="s"> FLASK_RUN_HOST 0.0.0.0</span>
+<span class="k">RUN </span>apk add <span class="nt">--no-cache</span> gcc musl-dev linux-headers
+<span class="k">COPY</span><span class="s"> requirements.txt requirements.txt</span>
+<span class="k">RUN </span>pip <span class="nb">install</span> <span class="nt">-r</span> requirements.txt
+<span class="k">EXPOSE</span><span class="s"> 5000</span>
+<span class="k">COPY</span><span class="s"> . .</span>
+<span class="k">CMD</span><span class="s"> ["flask", "run"]</span>
+</code></pre></div></div>
+
+<p>3、Docker-compose yaml文件（定义整个服务 需要的环境。 web、redis) 完成的上线服务！</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="na">version</span><span class="pi">:</span> <span class="s1">'</span><span class="s">3'</span>
+<span class="na">services</span><span class="pi">:</span>
+  <span class="na">web</span><span class="pi">:</span>
+    <span class="na">build</span><span class="pi">:</span> <span class="s">.</span>
+    <span class="na">ports</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="s2">"</span><span class="s">5000:5000"</span>
+  <span class="na">redis</span><span class="pi">:</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s2">"</span><span class="s">redis:alpine"</span>
+</code></pre></div></div>
+
+<p>4、启动compose 项目（docker-compose up）</p>
+
+<p><img src="https://cdn.jsdelivr.net/gh/meethong/images@latest/docker/docker_2020-07-30_17-47-39.png" alt="docker_2020-07-30_17-47-39" /></p>
+
+<p>流程：</p>
+
+<p>1、创建网络</p>
+
+<p>2、执行Docker-compose yaml</p>
+
+<p>3、启动服务。</p>
+
+<p><strong>Compose</strong> 中有两个重要的概念：
+服务 ( service )： 一个应用的容器， 实际上可以包括若干运行相同镜像的容器实例。
+项目 ( project )： 由一组关联的应用容器组成的一个完整业务单元， 在<strong>docker-compose.yml</strong> 文件中定义</p>
+
+<p><strong>Compose</strong> 的默认管理对象是项目， 通过子命令对项目中的一组容器进行便捷地生命周期管理。
+<strong>Compose</strong> 项目由 <strong>Python</strong> 编写， 实现上调用了 <strong>Docker</strong> 服务提供的 API 来对容器进行管理。 因此， 只要所操作的平台支持 <strong>Docker API</strong>， 就可以在其上利用<strong>Compose</strong> 来进行编排管理。</p>
+
+<p><strong>yaml 规则</strong></p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1">#3层 ！</span>
+
+<span class="na">version</span><span class="pi">:</span> <span class="s1">'</span><span class="s">'</span> <span class="c1">#版本</span>
+<span class="na">services</span><span class="pi">:</span> <span class="c1">#服务</span>
+  <span class="na">服务1</span><span class="pi">:</span> <span class="s">web</span>
+<span class="err">	</span><span class="c1"># 服务配置 docker</span>
+<span class="err">	</span><span class="s">images</span>
+<span class="err">	</span><span class="s">build</span>
+<span class="err">	</span><span class="s">network</span>
+<span class="err">	</span><span class="s">...</span>
+  <span class="s">服务2</span><span class="pi">:</span> <span class="s">redis</span>
+  <span class="s">#其他配置 网络/卷、全局规则</span>
+<span class="na">volumes</span><span class="pi">:</span>
+<span class="na">networks</span><span class="pi">:</span>
+<span class="na">configs</span><span class="pi">:</span>
+
+</code></pre></div></div>
+
+<h2 id="常用命令">常用命令</h2>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker-compose up <span class="nt">-d</span> <span class="c">#后台启动</span>
+docker-compose up <span class="nt">--build</span> <span class="c">#重新构建</span>
+docker-compose ps <span class="c">#列出所有运行容器</span>
+</code></pre></div></div>
+
+:ET

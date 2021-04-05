@@ -1,0 +1,28 @@
+I"�<p>记录Sublime的一些小技巧。</p>
+
+<h2 id="删除包含特定值的所有行">删除包含特定值的所有行</h2>
+
+<ol>
+  <li>选择字符串（要删除包含此字符串的每一行）。</li>
+  <li>按ALT + F3。</li>
+  <li>按Ctrl + L。</li>
+  <li>按删除</li>
+</ol>
+
+<h2 id="中文乱码">中文乱码</h2>
+
+<p>需要安装<code class="language-plaintext highlighter-rouge">ConvertToUTF8</code></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>ctrl +Shift + p
+</code></pre></div></div>
+
+<p><img src="https://i.opsta.cn/sublime/sublime-install.png" alt="image-20200523105141732" /></p>
+
+<p>回车 之后输入ConvertToUTF8 再 回车 就行</p>
+
+<h2 id="大小写替换">大小写替换</h2>
+
+<p><code class="language-plaintext highlighter-rouge">ctrl + KU</code>为大写
+<code class="language-plaintext highlighter-rouge">ctrl + KL</code>为小写</p>
+
+:ET

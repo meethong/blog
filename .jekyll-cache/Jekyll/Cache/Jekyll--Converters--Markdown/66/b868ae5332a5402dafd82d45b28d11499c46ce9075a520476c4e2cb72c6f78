@@ -1,0 +1,169 @@
+I"�-<p>Docker容器部署与数据卷持久化</p>
+
+<h1 id="docker实战安装">Docker实战安装</h1>
+
+<p>练习docker部署容器 熟悉相关操作</p>
+
+<h2 id="docker安装nginx">Docker安装Nginx</h2>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c"># 1、搜索镜像 search 建议去docker上搜索 可以看到帮助文档</span>
+<span class="c"># 2、下载镜像</span>
+<span class="c"># 3、运行测试</span>
+<span class="o">[</span>root@localhost ~]# docker pull nginx 
+<span class="c">#-d 后台运行</span>
+<span class="c">#--name 给容器命名</span>
+<span class="c">#-p 宿主机端口:容器内部端口</span>
+<span class="o">[</span>root@localhost ~]# docker run <span class="nt">-d</span> <span class="nt">--name</span> nginx01 <span class="nt">-p</span>:3344:80 nginx
+<span class="o">[</span>root@localhost ~]# docker ps
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                  NAMES
+322d937e89a9        nginx               <span class="s2">"/docker-entrypoint.…"</span>   10 seconds ago      Up 4 seconds        0.0.0.0:3344-&gt;80/tcp   nginx01
+<span class="o">[</span>root@localhost ~]# curl  localhost:3344
+<span class="c">#进入容器</span>
+<span class="o">[</span>root@localhost ~]# docker <span class="nb">exec</span> <span class="nt">-it</span> nginx01 /bin/bash
+root@322d937e89a9:/# whereis nginx        
+nginx: /usr/sbin/nginx /usr/lib/nginx /etc/nginx /usr/share/nginx
+root@322d937e89a9:/# <span class="nb">cd</span> /etc/nginx/
+root@322d937e89a9:/etc/nginx# <span class="nb">ls
+</span>conf.d	fastcgi_params	koi-utf  koi-win  mime.types  modules  nginx.conf  scgi_params	uwsgi_params  win-utf
+</code></pre></div></div>
+
+<h2 id="docker安装tomcat">Docker安装Tomcat</h2>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#docker run -it --rm 一般用来测试 用完就删除</span>
+docker run <span class="nt">-it</span> <span class="nt">--rm</span> tomcat 
+<span class="c">#先下载Docker</span>
+docker pull tomcat
+<span class="c">#启动运行</span>
+docker run <span class="nt">-d</span>  <span class="nt">--name</span> tomcat01 <span class="nt">-p</span> 80:8080 tomcat
+<span class="c">#默认404 因为默认tomcat容器中webapps下没有内容需要把webapps.dist下的内容复制到webapps</span>
+<span class="o">[</span>root@localhost ~]# docker <span class="nb">exec</span> <span class="nt">-it</span> tomcat01 /bin/bash
+root@8b2eb48c88d7:/usr/local/tomcat# <span class="nb">ls
+</span>BUILDING.txt	 LICENSE  README.md	 RUNNING.txt  conf  logs	    temp     webapps.dist
+CONTRIBUTING.md  NOTICE   RELEASE-NOTES  bin	      lib   native-jni-lib  webapps  work
+root@8b2eb48c88d7:/usr/local/tomcat# <span class="nb">cp</span> <span class="nt">-r</span> webapps.dist/<span class="k">*</span> webapps/
+<span class="c">#刷新再访问即可</span>
+</code></pre></div></div>
+
+<h2 id="docker部署es">Docker部署es</h2>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#es 暴露的端口很多</span>
+<span class="c">#es 十分耗内存</span>
+<span class="c">#es的数据一般需要放到安全目录 挂载</span>
+<span class="c"># --net somenetwork 网络配置</span>
+
+<span class="o">[</span>root@localhost ~]# docker run <span class="nt">-d</span> <span class="nt">--name</span> es  <span class="nt">-p</span> 9200:9200 <span class="nt">-p</span> 9300:9300 <span class="nt">-e</span> <span class="s2">"discovery.type=single-node"</span> elasticsearch
+28c62430ef6170fa965d1f3d30f94d71c4fb166b12f18184f35e1d924b77b009
+<span class="o">[</span>root@localhost ~]# docker ps 
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS              PORTS                                            NAMES
+28c62430ef61        elasticsearch       <span class="s2">"/docker-entrypoint.…"</span>   21 seconds ago      Up 20 seconds       0.0.0.0:9200-&gt;9200/tcp, 0.0.0.0:9300-&gt;9300/tcp   es
+<span class="c">#测试访问</span>
+<span class="o">[</span>root@localhost ~]# curl localhost:9200
+<span class="o">{</span>
+  <span class="s2">"name"</span> : <span class="s2">"2Cl8W2u"</span>,
+  <span class="s2">"cluster_name"</span> : <span class="s2">"elasticsearch"</span>,
+  <span class="s2">"cluster_uuid"</span> : <span class="s2">"M2RZefmIQH-9xmVofqzbfA"</span>,
+  <span class="s2">"version"</span> : <span class="o">{</span>
+    <span class="s2">"number"</span> : <span class="s2">"5.6.12"</span>,
+    <span class="s2">"build_hash"</span> : <span class="s2">"cfe3d9f"</span>,
+    <span class="s2">"build_date"</span> : <span class="s2">"2018-09-10T20:12:43.732Z"</span>,
+    <span class="s2">"build_snapshot"</span> : <span class="nb">false</span>,
+    <span class="s2">"lucene_version"</span> : <span class="s2">"6.6.1"</span>
+  <span class="o">}</span>,
+  <span class="s2">"tagline"</span> : <span class="s2">"You Know, for Search"</span>
+<span class="o">}</span>
+<span class="o">[</span>root@localhost ~]# 
+<span class="c">#查看dokcercpu状态</span>
+<span class="o">[</span>root@localhost ~]# docker stats es
+
+CONTAINER ID        NAME                CPU %               MEM USAGE / LIMIT     MEM %               NET I/O             BLOCK I/O           PIDS
+28c62430ef61        es                  100.69%             1.309GiB / 3.686GiB   35.51%              2.2kB / 0B          0B / 0B             4
+
+<span class="c">#es修改JAVA内存</span>
+<span class="o">[</span>root@localhost ~]# docker run <span class="nt">-d</span> <span class="nt">--name</span> es1  <span class="nt">-p</span> 9200:9200 <span class="nt">-p</span> 9300:9300 <span class="nt">-e</span> <span class="s2">"discovery.type=single-node"</span> <span class="nt">-e</span> <span class="nv">ES_JAVA_OPTS</span><span class="o">=</span><span class="s2">"-Xms64m -Xms512m"</span> elasticsearch
+adf66348505a744a1b2193870e184bdcfe39e3bfb7b32b9d9a77d9ee4cc3897e
+<span class="c">#查看dokcercpu状态</span>
+
+</code></pre></div></div>
+
+<h1 id="使用数据卷">使用数据卷</h1>
+
+<p>数据卷可以在容器之间共享和重用
+对数据卷的修改会立马生效
+对数据卷的更新， 不会影响镜像
+数据卷默认会一直存在， 即使容器被删除</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code>docker run <span class="nt">-it</span> <span class="nt">-v</span>  <span class="c">#宿主机路径:容器路径 镜像名</span>
+docker run <span class="nt">-it</span> <span class="nt">-v</span>  /opt/docker-centos/:/home centos /bin/bash
+</code></pre></div></div>
+
+<h2 id="安装mysql">安装MySQL</h2>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#获取mysql镜像</span>
+<span class="o">[</span>root@localhost docker-centos]# docker pull mysql:5.7
+<span class="c">#官方测试 docker run --name some-mysql -e MYSQL_ROOT_PASSWORD=my-secret-pw -d mysql:tag</span>
+<span class="c">#使用数据卷部署</span>
+<span class="c"># -d 后台运行</span>
+<span class="c"># -p 端口映射</span>
+<span class="c"># -v 卷挂载</span>
+<span class="c"># --name 容器名字</span>
+<span class="o">[</span>root@localhost /]# docker run <span class="nt">-d</span> <span class="nt">-p</span> 3301:3306 <span class="nt">-v</span> /opt/docker-mysql/conf:/etc/mysql/conf.d <span class="nt">-v</span> /opt/docker-mysql/data:/var/lib/mysql <span class="nt">-eMYSQL_ROOT_PASSWORD</span><span class="o">=</span>123456 <span class="nt">--name</span> mysql01 mysql:5.7
+<span class="c">#启动成功 本地连接一下或者查看3301端口是否存在</span>
+</code></pre></div></div>
+
+<h2 id="具名挂载和匿名挂载">具名挂载和匿名挂载</h2>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#查看所有 volume 的情况</span>
+<span class="c">#匿名挂载</span>
+<span class="c">#-v 容器内路径</span>
+docker run <span class="nt">-d</span> <span class="nt">-P</span> <span class="nt">--name</span> nginx12 <span class="nt">-v</span> /etc/nginx nginx
+<span class="o">[</span>root@localhost data]# docker volume <span class="nb">ls
+</span>DRIVER              VOLUME NAME
+<span class="nb">local               </span>280bc04bb4286c3f63ce7ec6146cb4e3165b04950ab0bf57887fc51e655e6f99
+<span class="c">#具名挂载</span>
+<span class="o">[</span>root@localhost data]# docker run <span class="nt">-d</span> <span class="nt">-P</span> <span class="nt">--name</span> nginx13 <span class="nt">-v</span> nginx:/etc/nginx nginx
+9694d2d47e9ff1ee8ca4e020ff6a3f045ac4a0f6d50965ccc3341e556d9903b9
+<span class="o">[</span>root@localhost data]# docker volume <span class="nb">ls
+</span>DRIVER              VOLUME NAME
+<span class="nb">local               </span>nginx
+
+<span class="c">#查看挂载路径</span>
+</code></pre></div></div>
+
+<p><img src="https://i.opsta.cn/docker/docker-volumes-nginx.png" alt="image-20200620220843507" />)</p>
+
+<p>所有docker容器内的卷,没有指定目录的情况下都是在/var/lib/docker/volumes/***/_data</p>
+
+<p>可以通过具名挂载方便找到路径</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nt">-v</span> 容器内路径 <span class="c">#匿名挂载</span>
+<span class="nt">-v</span> /宿主机路径:容器内路径 <span class="c">#指定路径挂载</span>
+<span class="nt">-v</span> 卷名:容器内路径 <span class="c">#具名挂载</span>
+</code></pre></div></div>
+
+<p>扩展</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c">#可以通过 -v 容器内路径 ro rw 改变读写权限</span>
+ro <span class="nb">readonly</span> <span class="c">#只读</span>
+rw readwrite <span class="c">#读写</span>
+一旦设置了ro那么容器就无法写文件 只能通过宿主机来操作
+</code></pre></div></div>
+
+<h1 id="数据卷容器">数据卷容器</h1>
+
+<p>如果你有一些持续更新的数据需要在容器之间共享， 最好创建数据卷容器。
+数据卷容器， 其实就是一个正常的容器， 专门用来提供数据卷供其它容器挂载的。
+首先， 创建一个名为 dbdata 的数据卷容器：</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost ~]#  docker run <span class="nt">-d</span> <span class="nt">-v</span> /opt/docker/docker-dbdata  <span class="nt">--name</span> dbdata training/postgres
+</code></pre></div></div>
+
+<p>然后， 在其他容器中使用 –volumes-from 来挂载 dbdata 容器中的数据卷。</p>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost ~]#  docker run <span class="nt">-d</span> <span class="nt">--volumes-from</span> dbdata <span class="nt">--name</span> db1 training/postgres  
+</code></pre></div></div>
+
+<div class="language-shell highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">[</span>root@localhost ~]#  docker run <span class="nt">-d</span> <span class="nt">--volumes-from</span> dbdata <span class="nt">--name</span> db2 training/postgres
+</code></pre></div></div>
+
+<p>可以使用超过一个的 –volumes-from 参数来指定从多个容器挂载不同的数据卷。 也可以从其他已经挂载了数据卷的容器来级联挂载数据卷 。</p>
+:ET

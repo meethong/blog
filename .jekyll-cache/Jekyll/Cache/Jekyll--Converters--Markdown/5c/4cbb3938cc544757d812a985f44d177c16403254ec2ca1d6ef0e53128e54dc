@@ -1,0 +1,157 @@
+I"�<p>编译安装mariadb+gelera,部署仲裁节点,之前弄过一次<a href="https://meethong.github.io/2020/03/18/mariadb-cluster/">yum安装的MariaDB+Galera</a>,其实编译也很简单,增加一些参数就行,工作中需要折腾了我两三天吧估计，编译命令整错了导致没编译上，记录一下。</p>
+
+<h2 id="编译mariadb">编译MariaDB</h2>
+
+<ol>
+  <li>
+    <p>编译mariadb需要用到cmake,gcc,c++之类的环境</p>
+
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>yum install -y cmake ncurses-devel gcc-c++
+</code></pre></div>    </div>
+  </li>
+  <li>
+    <p>下载MariaDB源码包及gelera</p>
+
+    <p>MariaDB:https://downloads.mariadb.com/MariaDB/mariadb-10.1.6/source/mariadb-10.1.6.tar.gz</p>
+
+    <p>gelera:http://releases.galeracluster.com/galera-3/centos/7/x86_64/galera-3-25.3.29-1.el7.x86_64.rpm</p>
+  </li>
+  <li>
+    <p>直接解压并且编译</p>
+
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>tar -xvf mariadb-10.1.6.tar.gz
+</code></pre></div>    </div>
+
+    <p>编译命令</p>
+
+    <div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cmake \
+-DCMAKE_INSTALL_PREFIX=/opt/meethong/mariadb \
+-DDEFAULT_SYSCONFDIR=/opt/meethong/mariadb \
+-DMYSQL_DATADIR=/opt/meethong/mariadb/data \
+-DMYSQL_TCP_PORT=8102 \
+-DMYSQL_UNIX_ADDR=/opt/meethong/mariadb/data/mysql.sock \
+-DEXTRA_CHARSETS=all \
+-DDEFAULT_CHARSET=utf8 \
+-DDEFAULT_COLLATION=utf8_general_ci \
+-DWITH_READLINE=1 \
+-DWITH_MYISAM_STORAGE_ENGINE=1 \
+-DWITH_INNOBASE_STORAGE_ENGINE=1 \
+-DWITH_MEMORY_STORAGE_ENGINE=1 \
+-DENABLED_LOCAL_INFILE=1 \
+-DWITH_SSL=system \
+-DWITH_ZLIB=system \
+-DWITH_LIBWRAP=0 \
+-DWITH_WSREP=ON \
+-DWITH_INNODB_DISALLOW_WRITES=ON \
+--------
+执行完camke 执行make
+make &amp; make install
+</code></pre></div>    </div>
+  </li>
+</ol>
+
+<h2 id="配置集群">配置集群</h2>
+
+<p><strong>安装galera-3-25.3.29-1.el7.x86_64</strong></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>rpm  -ivh galera-3-25.3.29-1.el7.x86_64.rpm --nodeps --force
+[root@demo ~]# rpm -qpl galera-3-25.3.29-1.el7.x86_64.rpm ##查看这个包的安装路径
+警告：galera-3-25.3.29-1.el7.x86_64.rpm: 头V4 RSA/SHA512 Signature, 密钥 ID bc19ddba: NOKEY
+/etc/sysconfig/garb
+/usr/bin/garb-systemd
+/usr/bin/garbd
+/usr/lib/systemd/system/garb.service
+/usr/lib64/galera-3
+/usr/lib64/galera-3/libgalera_smm.so
+/usr/share/doc/galera-3
+/usr/share/doc/galera-3/COPYING
+/usr/share/doc/galera-3/LICENSE.asio
+/usr/share/doc/galera-3/LICENSE.chromium
+/usr/share/doc/galera-3/LICENSE.crc32c
+/usr/share/doc/galera-3/README
+/usr/share/doc/galera-3/README-MySQL
+/usr/share/man/man8/garbd.8.gz
+[root@demo ~]# 
+</code></pre></div></div>
+
+<h3 id="配置mycnf">配置my.cnf</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vim /opt/meethong/mariadb/my.cnf #拉到最后把这段复制进去
+[galera]
+wsrep_on=ON
+wsrep_provider=/usr/lib64/galera-3/libgalera_smm.so#galera的库文件的地址
+wsrep_cluster_address="gcomm://192.168.0.190,192.168.0.189"#各节点的ip
+wsrep_node_name=demo#节点主机名
+wsrep_cluster_name=galera_cluster
+wsrep_node_address=192.168.0.189#节点ip
+binlog_format=row#二进制日志设置为行模式  row （安全性最高，性能最低）
+default_storage_engine=InnoDB#使用的默认引擎 innoDB  支持事务
+innodb_autoinc_lock_mode=2#2为性能最好
+
+配置下log日志文件地址
+[mysqld]
+log-error       =/opt/eetrust/mmeethong/data/mariadb.log
+</code></pre></div></div>
+
+<p><img src="https://i.opsta.cn/img/mariadb-build-my-cnf.png" alt="" /></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>第一台用这个命令启动
+service mysqld  bootstrap
+有错误就差看下日志,其他节点启动用这个
+service mysqld  start
+</code></pre></div></div>
+
+<h2 id="仲裁节点配置">仲裁节点配置</h2>
+
+<p>我的测试环境为两台mariadb 一台仲裁服务 仲裁并没有安装MariaDB</p>
+
+<p>安装galera-3-25.3.29-1.el7.x86_64 他的配置文件是<strong>/etc/sysconfig/garb</strong></p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[root@localhost ~]# more /etc/sysconfig/garb
+# Copyright (C) 2012 Codership Oy
+# This config file is to be sourced by garb service script.
+
+# A comma-separated list of node addresses (address[:port]) in the cluster
+# GALERA_NODES=""
+
+# Galera cluster name, should be the same as on the rest of the nodes.
+# GALERA_GROUP=""
+
+# Optional Galera internal options string (e.g. SSL settings)
+# see http://galeracluster.com/documentation-webpages/galeraparameters.html
+# GALERA_OPTIONS=""
+
+# Log file for garbd. Optional, by default logs to syslog
+# LOG_FILE=""
+
+GALERA_NODES="192.168.0.189:4567,192.168.0.190:4567" # 这里是两节点的地址
+GALERA_GROUP="galera_cluster"  # 这里的group名称保持与两节点的wsrep_cluster_name属性一致
+LOG_FILE="/var/log/garb.log"
+</code></pre></div></div>
+
+<h3 id="启停命令">启停命令</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[root@localhost ~]# systemctl stop garb 
+[root@localhost ~]# systemctl start garb
+</code></pre></div></div>
+
+<h3 id="查看集群节点">查看集群节点</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>mysql&gt; show status like 'wsrep_cluster_size';
++--------------------+-------+
+| Variable_name      | Value |
++--------------------+-------+
+| wsrep_cluster_size | 3     |
++--------------------+-------+
+1 row in set
+</code></pre></div></div>
+
+<h1 id="参考">参考</h1>
+
+<ol>
+  <li><a href="https://www.dwhd.org/20150924_133631.html">https://www.dwhd.org/20150924_133631.html</a></li>
+  <li><a href="https://jeremy-xu.oschina.io/2018/02/mariadb-galera-cluster部署实战/#mariadb-galera-cluster的自启动">https://jeremy-xu.oschina.io/2018/02/mariadb-galera-cluster%E9%83%A8%E7%BD%B2%E5%AE%9E%E6%88%98/#mariadb-galera-cluster%E7%9A%84%E8%87%AA%E5%90%AF%E5%8A%A8</a></li>
+  <li><a href="https://blog.51cto.com/1130739/1852319">https://blog.51cto.com/1130739/1852319</a></li>
+</ol>
+
+:ET

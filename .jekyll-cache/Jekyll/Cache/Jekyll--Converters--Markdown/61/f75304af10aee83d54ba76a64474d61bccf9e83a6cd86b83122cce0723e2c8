@@ -1,0 +1,22 @@
+I"u<p>启动报错提示指定的堆栈太小，请至少指定 328 k</p>
+
+<h2 id="solr报错">Solr报错</h2>
+
+<p>运行<code class="language-plaintext highlighter-rouge">./solr start -force -f </code>  提示相关内容</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>The stack size specified is too small, Specify at least 328k
+Error: Could not create the Java Virtual Machine.
+Error: A fatal exception has occurred. Program will exit.
+</code></pre></div></div>
+
+<p>这个问题查找相关配置烦了我挺久，第一次使用不太清楚，随即Google 找到个类似报错设置java内存大小导致solr启动不了，然后查找配置看到了配置256k的地方 我寻思这个太小设置为1024就启动成功了</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>vim solr/bin/solr
+</code></pre></div></div>
+
+<p><img src="https://i.opsta.cn/img/20200414101330.png" alt="solr文件" /></p>
+
+<p>修改256为1024即可 再启动</p>
+
+<p><img src="https://i.opsta.cn/img/solr-stack-start.png" alt="solr启动" /></p>
+:ET

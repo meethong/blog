@@ -1,0 +1,54 @@
+I"B
+<p>分享一下日常用到的命令,经常忘记，记录一下！！！</p>
+
+<h2 id="linux小技巧">linux小技巧</h2>
+
+<h3 id="linux查看某个进程占用的端口">linux查看某个进程占用的端口</h3>
+
+<p>先获取 pid 然后 grep</p>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>netstat -nltp 
+
+netstat -nltp | grep 10980
+</code></pre></div></div>
+
+<h2 id="nginx-日志分析">Nginx 日志分析</h2>
+
+<h3 id="根据状态码进行请求次数排序">根据状态码进行请求次数排序</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>cat access.log | cut -d '"' -f3 | cut -d ' ' -f2 | sort | uniq -c | sort -r
+</code></pre></div></div>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>awk '{print $9}' access.log | sort | uniq -c | sort -r
+</code></pre></div></div>
+
+<h3 id="找出状态码的请求url">找出状态码的请求url</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>awk '($9 ~ /404/)' access.log | awk '{print $7}' | sort | uniq -c | sort -r
+</code></pre></div></div>
+
+<h3 id="找出请求的ip地址">找出请求的ip地址</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>awk -F\" '($2 ~ "/zzz.php"){print $1}' access.log | awk '{print $1}' | sort | uniq -c | sort -r
+</code></pre></div></div>
+
+<h3 id="找出url有php">找出url有php</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>awk -F\" '($2 ~ "php"){print $2}' access.log | awk '{print $2}' | sort | uniq -c | sort -r
+</code></pre></div></div>
+
+<h3 id="查看单个ip访问">查看单个ip访问</h3>
+
+<div class="language-javascript highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="nx">grep</span> <span class="o">^</span><span class="mf">123.123</span><span class="p">.</span><span class="mf">123.123</span> <span class="nx">access</span><span class="p">.</span><span class="nx">log</span> 
+</code></pre></div></div>
+
+<h3 id="获取pv数">获取pv数</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ cat access.log | wc -l
+</code></pre></div></div>
+
+<h3 id="获取ip数">获取ip数</h3>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$ cat access.log | awk '{print $1}' | sort -k1 -r | uniq | wc -l
+</code></pre></div></div>
+:ET
