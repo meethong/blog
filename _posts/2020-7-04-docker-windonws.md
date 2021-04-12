@@ -1,12 +1,12 @@
 ---
 layout: post
-title: windonws 10部署使用Docker
+title:windows 10部署使用Docker
 categories: [Docker]
 description: Docker
 keywords: Docker
 ---
 
-Windonws 去安装 Docker是基于 Hyper-V的，所以必须**启用Hyper-V Windows功能** 官网的安装包也会去开启相关功能。
+Windows 去安装 Docker是基于 Hyper-V的，所以必须**启用Hyper-V Windows功能** 官网的安装包也会去开启相关功能。
 
 # Docker
 
