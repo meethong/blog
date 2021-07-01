@@ -21,7 +21,11 @@
         </div>
         <div class="article-date">
           <time datetime="{{ page.date }}">{{ page.date | date: "%Y/%m/%d" }}</time>
+          <a href="{{ site.url }}/categories/#{{ page.categories }}"  class="article-date" >{{ page.categories }} </a>
         </div>
+
+        
+
       </div>
       <div class="article-main">
         {{ content }}

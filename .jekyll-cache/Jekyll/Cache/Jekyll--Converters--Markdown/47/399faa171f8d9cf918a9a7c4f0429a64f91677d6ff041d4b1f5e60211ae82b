@@ -1,4 +1,4 @@
-I"�<p>Windonws 去安装 Docker是基于 Hyper-V的，所以必须<strong>启用Hyper-V Windows功能</strong> 官网的安装包也会去开启相关功能。</p>
+I"�<p>Windows 去安装 Docker是基于 Hyper-V的，所以必须<strong>启用Hyper-V Windows功能</strong> 官网的安装包也会去开启相关功能。</p>
 
 <h1 id="docker">Docker</h1>
 
