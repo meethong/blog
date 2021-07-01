@@ -6,14 +6,15 @@ permalink: /blog.html
 <div class="page-title" id="programming">Blog</div>
 <div class="archive-main">
   {% for post in site.posts %}
-  {% if post.type == "programming" or post.type == "lifestyle" %}
+
   <div class="archive-item">
     <div class="archive-date">{{ post.date | date: "%Y/%m/%d" }}</div>
-    <div class="archive-title"><a href="{{ site.url }}{{ post.url }}">{{ post.title }}</a></a></div>
+    <div class="archive-title"><a href="{{ post.permalink }}">{{ post.title }}</a></div>
   </div>
-  {% endif %}
+
   {% endfor %}
   <p class="archive-more">
+
     <a href="http://blog.opsta.cn/" target="_blank">Oldschool Blog</a>
   </p>
 </div>
