@@ -8,10 +8,8 @@ permalink: /blog.html
   {% for post in site.posts %}
   <div class="archive-item">
     <div class="archive-date">{{ post.date | date: "%Y/%m/%d" }}</div>
-    <div class="archive-title"><a href="{{ post.permalink }}">{{ post.title }}</a></div>
+    <div class="archive-title"><a href="{{ post.pages }}">{{ post.title }}</a></div>
   </div>
   {% endfor %}
-  <p class="archive-more">
-    <a href="http://blog.opsta.cn/" target="_blank">Oldschool Blog</a>
-  </p>
+
 </div>
